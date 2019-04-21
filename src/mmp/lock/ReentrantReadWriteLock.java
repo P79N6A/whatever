@@ -33,17 +33,54 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 
     abstract static class Sync extends AbstractQueuedSynchronizer {
 
+        // 2^16-1
         // 读写锁 state int 共4个字节32位，读写状态各占16位，高16位表示读，低16位表示写
         // 写状态 state & 0x0000FFFF
         // 读状态 state >>> 16
         // 写状态 + 1 state + 1，
         // 读状态 + 1 state + (1 << 16)
 
+        /*
+         * 读锁是可共享的，写锁是互斥的
+         * 写锁，用低16位表示线程的重入次数
+         * 读锁，可以同时有多个线程，重入次数通过ThreadLocal变量来记录
+         * */
         static final int SHARED_SHIFT = 16;
         static final int SHARED_UNIT = (1 << SHARED_SHIFT);
         static final int MAX_COUNT = (1 << SHARED_SHIFT) - 1;
         static final int EXCLUSIVE_MASK = (1 << SHARED_SHIFT) - 1;
 
+
+        /*
+         * 无符号位移（>>>）和有符号位移（>>）
+         * 有符号位移时如果为正数时位移后前面补0，为负数时则位移后前面补1
+         * */
+
+        // 15>>>2
+        // 00000000 00000000 00000000 00001111 ->
+        // 00000000 00000000 00000000 00000011 ->
+        // 3
+
+        // 15>>2
+        // 00000000 00000000 00000000 00001111 ->
+        // 00000000 00000000 00000000 00000011 ->
+        // 3
+
+        // -15>>>2
+        // 11111111 11111111 11111111 11110001 ->
+        // 00111111 11111111 11111111 11111100 ->
+        // 2^2+2^3+2^4+...+2^30=1073741820
+
+        // -15>>2
+        // 11111111 11111111 11111111 11110001 ->
+        // 11111111 11111111 11111111 11111100 ->
+        // 补码（负数的二进制）=反码+1
+        // -1：11111111 11111111 11111111 11111011 ->
+        // 反码：00000000 00000000 00000000 00000100 ->
+        // -4
+
+        // 当需要移位的数为正数时，有符号位移（>>）和无符号位移（>>>）是相同的。
+        // 当需要移位的数为负数时，有符号位移（>>）的结果 还为负数，无符号位移（>>>）的结果为正数
 
         static int sharedCount(int c) {
             return c >>> SHARED_SHIFT;
@@ -283,7 +320,6 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
         private IllegalMonitorStateException unmatchedUnlockException() {
             return new IllegalMonitorStateException("attempt to unlock read lock, not locked by current thread");
         }
-
 
 
         final boolean tryWriteLock() {

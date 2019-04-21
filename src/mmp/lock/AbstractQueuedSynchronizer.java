@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.AbstractOwnableSynchronizer;
 
+
 public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchronizer {
 
     protected AbstractQueuedSynchronizer() {
@@ -13,6 +14,8 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
 
     // AQS队列的节点，双向链表
     static final class Node {
+
+
         // 共享模式
         static final Node SHARED = new Node();
         // 独占模式
@@ -44,6 +47,8 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
         Node nextWaiter;
 
         // 共享锁或独占锁
+        // 独占锁同时只有一条线程可以acquire成功，共享锁同时可能有多条线程可以acquire成功，如 Semaphore
+        // 独占锁每次只能唤醒一个Node，共享锁每次唤醒的时候可以将状态向后传播，即可能唤醒多个Node，如 CountDownLatch
         final boolean isShared() {
             return nextWaiter == SHARED;
         }
@@ -305,7 +310,7 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
     // 1：unpark。前驱节点用完锁之后，通过unpark()唤醒当前线程
     // 2：中断。其它线程通过interrupt()中断当前线程
     private final boolean parkAndCheckInterrupt() {
-        LockSupport.park(this);
+        LockSupport.park(this); // 可响应中断，但是不会抛出异常
         return Thread.interrupted(); // 这里会复位
     }
 
@@ -335,11 +340,12 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
                 }
 
                 // 如果当前节点是因为中断而唤醒，那就不公平了
+                // 唤醒不表示线程能立刻运行，而是表示线程处于就绪状态，可以运行而已
 
                 // 如果可以安全阻塞（设置好前继SIGNAL了），就尝试阻塞自己等待，然后返回线程的中断状态并复位中断状态
 
-                // 如果当前线程是非中断状态，park时被阻塞，此时返回中断状态是false
-                // 如果当前线程是中断状态，park不起作用，会立即返回，parkAndCheckInterrupt返回true，并复位
+                // 如果当前线程是非中断状态，parkAndCheckInterrupt被阻塞，直到被唤醒，返回中断状态并复位，再次循环
+                // 如果当前线程是中断状态，park不起作用，会立即返回，parkAndCheckInterrupt返回true，并恢复中断状态
                 // 再次循环进来时，由于之前已经复位该线程的中断状态，再次调用park方法时会阻塞
                 if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt()) interrupted = true;
                 // 这里判断中断是为了不让循环一直执行，让当前线程进入阻塞
@@ -666,9 +672,9 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
 
     // Instrumentation methods for conditions
 
-
     public class ConditionObject implements Condition {
 
+        // 因为await要先lock，没有竞争，所以没有使用任何CAS操作，也没有用volatile修饰
         // 第一个等待的节点
         private transient Node firstWaiter;
 
@@ -823,7 +829,7 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
             // 拿到锁
             if (acquireQueued(node, savedState) && interruptMode != THROW_IE) interruptMode = REINTERRUPT;
             // clean up if cancelled
-            // 如果节点从等待状态转换为在同步队列中，并且也已经获得了锁，此时将断开此节点后面的等待节点
+            // 如果节点从等待状态转换为在AQS同步队列中，并且也已经获得了锁，此时将断开此节点后面的等待节点
             // 如果节点的后继节点不是 null，则清理 Condition 队列上的节点
             if (node.nextWaiter != null) unlinkCancelledWaiters();
             // 如果线程被中断了，需要抛出异常，或什么都不做
@@ -925,16 +931,13 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
         return unsafe.compareAndSwapObject(this, headOffset, null, update);
     }
 
-
     private final boolean compareAndSetTail(Node expect, Node update) {
         return unsafe.compareAndSwapObject(this, tailOffset, expect, update);
     }
 
-
     private static final boolean compareAndSetWaitStatus(Node node, int expect, int update) {
         return unsafe.compareAndSwapInt(node, waitStatusOffset, expect, update);
     }
-
 
     private static final boolean compareAndSetNext(Node node, Node expect, Node update) {
         return unsafe.compareAndSwapObject(node, nextOffset, expect, update);

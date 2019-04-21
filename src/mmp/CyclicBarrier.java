@@ -1,11 +1,13 @@
 package mmp;
 
 
+import mmp.lock.Condition;
+import mmp.lock.ReentrantLock;
+
+import java.lang.Thread;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 // 栅栏 屏障
 // 通过ReentrantLock独占锁和Condition实现

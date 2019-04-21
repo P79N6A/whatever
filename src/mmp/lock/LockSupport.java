@@ -1,6 +1,16 @@
 package mmp.lock;
 
-
+/*
+ * Object#wait之前当前线程必须先获得该对象的监视器(synchronized)，被Object#notify之后需要重新获取到监视器才能继续执行。
+ * LockSupport#park/unpark不需要获取对象的监视器，而是给线程一个许可。
+ * 一个线程一个许可（默认不可用），LockSupport#park时，如果许可可用，消费这个许可（将许可变为不可用）并立即返回；如果许可不可用，阻塞。
+ * LockSupport#unpark使许可变为可用（许可不能累加，只有一个）。
+ * 如果先多次unpark，只有park一次也没有问题，因为许可只有一个。
+ * Object#wait/notify存在时序问题，wait必须在notify调用之前调用。
+ * 因为实现机制不一样，LockSupport阻塞的线程，notify/notifyAll没法唤醒。
+ * 但是LockSupport#park和Object#wait一样也能响应中断。
+ * 线程如果因为LockSupport#park而阻塞的话，能够响应中断请求(中断状态被设置成true)，但是不会抛出InterruptedException。
+ * */
 public class LockSupport {
     private LockSupport() {
     } // Cannot be instantiated.
