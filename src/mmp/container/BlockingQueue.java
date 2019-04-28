@@ -7,11 +7,11 @@ import java.util.concurrent.TimeUnit;
 
 /*
  * 队列操作当前不可用时，四种处理方式：
- * 抛出异常： add(), remove(), element()
+ * 抛出异常：add(), remove(), element()
  * 返回某个值（null 或 false）：offer(), poll(), peek()
  * 阻塞当前线程，直到操作可以进行：put(), take()
  * 阻塞一段时间，超时后退出：offer, poll()
- * BlockingQueue 不允许有 null 元素，null 是异常返回值
+ * BlockingQueue不允许有null元素，null是异常返回值
  * */
 public interface BlockingQueue<E> extends Queue<E> {
     // 添加失败时会抛出异常

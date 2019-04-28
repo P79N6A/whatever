@@ -1,10 +1,12 @@
 package mmp.threadpool;
 
-import mmp.Callable;
 import mmp.container.LinkedBlockingQueue;
 import mmp.container.SynchronousQueue;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,16 +32,16 @@ public class Executors {
     }
 
     public static ExecutorService newSingleThreadExecutor() {
-        return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()));
+        return new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     }
 
     public static ExecutorService newSingleThreadExecutor(ThreadFactory threadFactory) {
-        return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory));
+        return new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory);
     }
 
-    // 无界线程池 不管多少任务提交进来，都直接运行
+    // 无界线程池，不管多少任务提交进来，都直接运行
     public static ExecutorService newCachedThreadPool() {
-        // SynchronousQueue 传递任务，并不会保存
+        // SynchronousQueue传递任务，并不会保存
         // corePoolSize 0
         // 自动回收
         return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
@@ -102,52 +104,6 @@ public class Executors {
             if (t.isDaemon()) t.setDaemon(false);
             if (t.getPriority() != Thread.NORM_PRIORITY) t.setPriority(Thread.NORM_PRIORITY);
             return t;
-        }
-    }
-
-
-    static class DelegatedExecutorService extends AbstractExecutorService {
-        private final ExecutorService e;
-
-        DelegatedExecutorService(ExecutorService executor) {
-            e = executor;
-        }
-
-        public void execute(Runnable command) {
-            e.execute(command);
-        }
-
-        public void shutdown() {
-            e.shutdown();
-        }
-
-        public List<Runnable> shutdownNow() {
-            return e.shutdownNow();
-        }
-
-        public boolean isShutdown() {
-            return e.isShutdown();
-        }
-
-        public boolean isTerminated() {
-            return e.isTerminated();
-        }
-
-        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-            return e.awaitTermination(timeout, unit);
-        }
-
-
-    }
-
-    static class FinalizableDelegatedExecutorService extends DelegatedExecutorService {
-
-        FinalizableDelegatedExecutorService(ExecutorService executor) {
-            super(executor);
-        }
-
-        protected void finalize() {
-            super.shutdown();
         }
     }
 

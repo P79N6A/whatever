@@ -1,4 +1,4 @@
-package mmp;
+package mmp.test;
 
 @FunctionalInterface
 public interface Callable<V> {

@@ -74,7 +74,7 @@ public class CyclicBarrier {
             if (g.broken) throw new BrokenBarrierException();
             // 如果当前线程被中断
             if (Thread.interrupted()) {
-                breakBarrier(); // 将损坏状态设置为 true 并通知其他阻塞在此栅栏上的线程
+                breakBarrier(); // 将损坏状态设置为true 并通知其他阻塞在此栅栏上的线程
                 throw new InterruptedException();
             }
             // 计数器-1
@@ -91,7 +91,7 @@ public class CyclicBarrier {
                     nextGeneration();
                     return 0;
                 } finally {
-                    // 如果执行栅栏任务的时候失败了 就将栅栏失效
+                    // 如果执行栅栏任务的时候失败了，就将栅栏失效
                     if (!ranAction) breakBarrier();
                 }
             }
@@ -102,7 +102,7 @@ public class CyclicBarrier {
                 try {
                     // 如果没有时间限制 则直接等待 直到被唤醒
                     if (!timed) trip.await(); // 这里会释放锁
-                        // 如果有时间限制 则等待指定时间
+                        // 如果有时间限制，则等待指定时间
                     else if (nanos > 0L) nanos = trip.awaitNanos(nanos);
                 } catch (InterruptedException ie) {
                     // 如果等待过程中，线程被中断
@@ -116,8 +116,8 @@ public class CyclicBarrier {
                         Thread.currentThread().interrupt();
                     }
                 }
-                // 任何一个线程中断了 会调用 breakBarrier 唤醒其他的线程
-                // 其他线程醒来后 也要抛出异常
+                // 任何一个线程中断了，会调用breakBarrier唤醒其他的线程
+                // 其他线程醒来后，也要抛出异常
                 if (g.broken) throw new BrokenBarrierException();
 
                 // 一个线程可以使用多个栅栏，当别的栅栏唤醒了这个线程，需要判断是否是当前代
@@ -137,7 +137,7 @@ public class CyclicBarrier {
     }
 
 
-    // 在所有参与者都已经在此屏障上调用 await 方法之前，将一直阻塞
+    // 在所有参与者都已经在此屏障上await之前，将一直阻塞
     public int await() throws InterruptedException, BrokenBarrierException {
         try {
             return dowait(false, 0L);

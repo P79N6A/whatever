@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 /*
 应用场景
-DelayedQueue可以快速找到要失效的对象，但DelayedQueue内部的PriorityQueue的（插入、删除时的排序）也耗费资源
+DelayedQueue可以快速找到要失效的对象，但DelayedQueue内部的PriorityQueue的插入、删除时的排序也耗费资源
 
 a) 关闭空闲连接。服务器中，有很多客户端的连接，空闲一段时间之后需要关闭之。
 b) 缓存。缓存中的对象，超过了空闲时间，需要从缓存中移出。

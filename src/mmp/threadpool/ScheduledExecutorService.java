@@ -1,7 +1,8 @@
 package mmp.threadpool;
 
-import mmp.Callable;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public interface ScheduledExecutorService extends ExecutorService {

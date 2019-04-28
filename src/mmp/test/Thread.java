@@ -3,11 +3,11 @@ package mmp.test;
 
 public class Thread implements Runnable {
 
-    // 每个线程都有一个自己的ThreadLocal.ThreadLocalMap对象
-    // Map中的key为一个ThreadLocal实例，Map使用了弱引用，不过弱引用只针对key，每个key都弱引用指向ThreadLocal实例
-    // 当把ThreadLocal实例置为null以后，没有任何强引用指向ThreadLocal实例，所以ThreadLocal实例将会被GC
-    // 但是value却不能回收，因为存在一条从current thread过来的强引用
-    // 只有当前thread结束以后，current thread就不会存在栈中，强引用断开，Current Thread, Map, value将全部被GC
+    // 每个线程都有一个自己的ThreadLocal.ThreadLocalMap对象，里面是Entry数组
+    // Entry的key为一个ThreadLocal实例，Entry继承了弱引用，不过弱引用只指向ThreadLocal实例
+    // 当把ThreadLocal实例置为null以后，没有任何强引用指向ThreadLocal实例，ThreadLocal实例将会被GC
+    // 但是value却不能回收，因为存在一条从 thread -> threadLocals -> value 的强引用
+    // 当前线程结束以后，引用就不会存在栈中，强引用断开，当前线程，ThreadLocalMap，value全部被GC
     ThreadLocal.ThreadLocalMap threadLocals = null;
 
     public static native Thread currentThread();
@@ -25,9 +25,9 @@ public class Thread implements Runnable {
 
     /*
      * 中断：运行时中断，阻塞时中断
-     * 阻塞时中断分 2 种。一种是在等待锁的时候中断，一种是进入锁的时候，wait 的时候中断
-     * 例如一个 synchronized 同步块，当多线程访问同步块时，同步块外的就是等待锁的状态。
-     * 进入锁了，执行 wait 方法，也是阻塞的状态。
+     * 阻塞时中断分两种。一种是在等待锁的时候中断，一种是进入锁的时候，wait的时候中断
+     * 一个synchronized同步块，当多线程访问同步块时，同步块外的就是等待锁的状态
+     * 进入锁了，执行wait方法，也是阻塞的状态
      *
      * */
 
@@ -36,26 +36,26 @@ public class Thread implements Runnable {
     public void interrupt() {
     }
 
-    // 静态方法 判断是否中断，并清除中断状态，第二次调用永远返回 false
+    // 静态方法，判断是否中断，并清除中断状态，第二次调用永远返回false
     public static boolean interrupted() {
         return currentThread().isInterrupted(true);
     }
 
-    // 实例方法 判断线程是否中断
+    // 实例方法，判断线程是否中断
     public boolean isInterrupted() {
         return isInterrupted(false);
     }
 
     private native boolean isInterrupted(boolean ClearInterrupted);
 
-    // 暂停当前线程，让出 CPU 给优先级与当前线程相同，或者更高的就绪状态的线程
+    // 暂停当前线程，让出CPU给优先级与当前线程相同，或者更高的就绪状态的线程
     // 不会进入到阻塞状态，而是进入到就绪状态
     // 只是让当前线程暂停一下，重新进入就绪的线程池中
     public static native void yield();
 
-    // 只是让出 CPU，不会释放锁
+    // 只是让出CPU，不会释放锁
     // 使当前线程进入阻塞状态
-    // 由于休眠时间结束后不一定会立即被 CPU 调度，因此线程休眠的时间可能大于传入参数
+    // 由于休眠时间结束后不一定会立即被CPU调度，因此线程休眠的时间可能大于传入参数
     public static native void sleep(long millis) throws InterruptedException;
 
     public static void sleep(long millis, int nanos) throws InterruptedException {
@@ -129,7 +129,7 @@ public class Thread implements Runnable {
         // new了但是没有启动
         NEW,
 
-        // 可运行状态 start()
+        // 可运行状态start()
         // 可能正在Java虚拟机中运行，也可能正在等待处理器的资源，线程必须获得CPU资源后，才可以运行run()方法，否则排队等待
         RUNNABLE,
 

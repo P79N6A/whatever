@@ -1,4 +1,4 @@
-package mmp;
+package mmp.test;
 
 import mmp.threadpool.ExecutionException;
 

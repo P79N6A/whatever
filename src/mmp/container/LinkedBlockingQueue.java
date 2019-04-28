@@ -32,16 +32,16 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E> implements Blocking
     }
 
 
-    // 当前容量，默认 Integer.MAX_VALUE
+    // 当前容量，默认Integer.MAX_VALUE
     private final int capacity;
 
     // 队列中的元素数量
     private final AtomicInteger count = new AtomicInteger();
 
-    // 队列头节点 头节点的 item 永远为 null
+    // 队列头节点 头节点的item永远为null
     transient Node<E> head;
 
-    // 队列尾节点，尾节点 next 永远为 null
+    // 队列尾节点，尾节点next永远为null
     private transient Node<E> last;
 
     // 获取元素的锁

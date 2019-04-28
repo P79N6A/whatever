@@ -32,7 +32,7 @@ public class WaitNotify {
         //     }
         // }
 
-        // notifyAll 和 notify 不会立即生效，必须等到调用方执行完同步代码块，放弃锁之后才起作用
+        // notifyAll和notify不会立即生效，必须等到调用方执行完同步代码块，放弃锁之后才起作用
         // synchronized (lock) {
         //     flag
         //     lock.notifyAll();

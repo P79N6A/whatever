@@ -1,6 +1,5 @@
 package mmp.threadpool;
 
-import mmp.Future;
 import mmp.container.LinkedBlockingQueue;
 import mmp.threadpool.Executors;
 
@@ -48,16 +47,16 @@ public class CustomThreadPoolExecutor {
         }, 5, TimeUnit.SECONDS);
 
 
-        // initialDelay（初始延迟） 表示第一次延时时间
-        // period 表示间隔时间
-        // 将在 initialDelay 后开始执行，然后在 initialDelay+period 后执行，接着在 initialDelay + 2 * period 后执行，依此类推
+        // initialDelay（初始延迟）表示第一次延时时间
+        // period表示间隔时间
+        // 将在initialDelay后开始执行，然后在initialDelay+period后执行，接着在initialDelay + 2 * period后执行，依此类推
         // 如果前面的任务没有完成，则调度也不会启动
         ((mmp.threadpool.ScheduledExecutorService) scheduledThreadPool).scheduleAtFixedRate(() -> {
         }, 0, 2, TimeUnit.SECONDS);
 
 
-        // initialDelay（初始延迟） 表示延时时间
-        // delay + 任务执行时间 = 等于间隔时间 period
+        // initialDelay（初始延迟）表示延时时间
+        // delay + 任务执行时间 = 间隔时间period
         // 每一次执行终止和下一次执行开始之间都存在给定的延迟
         ((mmp.threadpool.ScheduledExecutorService) scheduledThreadPool).scheduleWithFixedDelay(() -> {
         }, 0, 2, TimeUnit.SECONDS);
@@ -65,9 +64,8 @@ public class CustomThreadPoolExecutor {
 
 
         /*
-         * submit有返回值 execute没有
-         * submit返回值可以执行cancel取消操作
-         * 或者调用get
+         * submit有返回值，execute没有
+         * submit返回值可以执行cancel取消操作，或者调用get
          */
 
         Future<String> future = threadPoolExecutor.submit(() -> "MMP");

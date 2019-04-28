@@ -97,14 +97,14 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
      * */
     public boolean offer(E e) {
         checkNotNull(e); // 不允许null入队
-        // 将入队元素构造为Node节点 内部调用unsafe.putObject
+        // 将入队元素构造为Node节点，内部调用unsafe.putObject
         final Node<E> newNode = new Node<>(e);
         // 从尾节点插入
         for (Node<E> t = tail, p = t; ; ) {
             Node<E> q = p.next;
 
             // 1
-            // p.next=null 说明p是尾节点 插入
+            // p.next=null 说明p是尾节点，插入
             if (q == null) {
                 // 由于多线程调用offer，可能多线程 A B 同时CAS插入p.next
                 // 线程B 再次进入，将新节点加到最后一个节点后面

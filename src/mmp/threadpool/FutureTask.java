@@ -1,13 +1,10 @@
 package mmp.threadpool;
 
-import mmp.Callable;
 import mmp.lock.LockSupport;
 
 import java.lang.Thread;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 public class FutureTask<V> implements RunnableFuture<V> {
 
@@ -59,20 +56,20 @@ public class FutureTask<V> implements RunnableFuture<V> {
 
     // 取消任务
     public boolean cancel(boolean mayInterruptIfRunning) {
-        // 如果任务已完成、或已取消，或者无法取消，则此尝试将失败
+        // 如果任务已完成，或已取消，或者无法取消，则此尝试将失败
         if (!(state == NEW && UNSAFE.compareAndSwapInt(this, stateOffset, NEW, mayInterruptIfRunning ? INTERRUPTING : CANCELLED)))
             return false;
 
         // 如果调用成功，而此任务尚未启动，则此任务将永不运行
         try {    // in case call to interrupt throws exception
-            // 如果任务已经启动，则 mayInterruptIfRunning 参数确定是否中断执行此任务的线程
+            // 如果任务已经启动，mayInterruptIfRunning参数确定是否中断执行此任务的线程
             if (mayInterruptIfRunning) {
                 try {
                     Thread t = runner;
-                    // 调用线程的 interrupt 方法
+                    // 调用线程的interrupt方法
                     if (t != null) t.interrupt();
                 } finally { // final state
-                    // 将状态改成 INTERRUPTED
+                    // 将状态改成INTERRUPTED
                     UNSAFE.putOrderedInt(this, stateOffset, INTERRUPTED);
                 }
             }
@@ -84,7 +81,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
 
     // 挂起自己等待异步线程唤醒，然后拿去异步线程设置好的数据
     // 首先判断状态，然后挂起自己等待，最后返回结果
-    // 并发访问 get 的时候，需要将这些线程保存在 FutureTask 内部的栈中
+    // 并发访问get的时候，需要将这些线程保存在FutureTask内部的栈中
     public V get() throws InterruptedException, ExecutionException {
         int s = state;
         if (s <= COMPLETING) s = awaitDone(false, 0L);
@@ -102,11 +99,11 @@ public class FutureTask<V> implements RunnableFuture<V> {
     }
 
     protected void set(V v) {
-        // 先将状态变成 COMPLETING
+        // 先将状态变成COMPLETING
         if (UNSAFE.compareAndSwapInt(this, stateOffset, NEW, COMPLETING)) {
             // 然后设置结果
             outcome = v;
-            // 再然后设置状态为 NORMAL
+            // 再然后设置状态为NORMAL
             UNSAFE.putOrderedInt(this, stateOffset, NORMAL); // final state
             // 最后唤醒等待线程
             finishCompletion();
@@ -132,7 +129,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
                 V result;
                 boolean ran;
                 try {
-                    // 执行 callable 的 call 方法
+                    // 执行callable的call方法
                     result = c.call();
                     ran = true;
                 } catch (Throwable ex) {
@@ -150,7 +147,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
             // state must be re-read after nulling runner to prevent
             // leaked interrupts
             int s = state;
-            // 在 INTERRUPTING 和 INTERRUPTED 的这段时间，需要自旋等待状态变成 INTERRUPTED
+            // 在INTERRUPTING和INTERRUPTED的这段时间，需要自旋等待状态变成INTERRUPTED
             if (s >= INTERRUPTING) handlePossibleCancellationInterrupt(s);
         }
     }
@@ -189,7 +186,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
     }
 
 
-    // 栈结构 后进先出(LIFO)
+    // 栈结构，后进先出(LIFO)
     static final class WaitNode {
         volatile Thread thread;
         volatile WaitNode next;
@@ -202,7 +199,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
     private void finishCompletion() {
         // assert state > COMPLETING;
         for (WaitNode q; (q = waiters) != null; ) {
-            // 先将 waiters 修改成 null
+            // 先将waiters修改成null
             if (UNSAFE.compareAndSwapObject(this, waitersOffset, q, null)) {
                 // 遍历栈中所有节点，也就是所有等待的线程，依次唤醒他们
                 for (; ; ) {
@@ -239,16 +236,16 @@ public class FutureTask<V> implements RunnableFuture<V> {
             }
 
             int s = state;
-            // 大于 COMPLETING ，说明任务完成了，返回结果
+            // 大于COMPLETING，说明任务完成了，返回结果
             if (s > COMPLETING) {
                 if (q != null) q.thread = null;
                 return s;
             }
-            // 如果等于 COMPLETING，说明任务快要完成了，自旋一会
+            // 如果等于COMPLETING，说明任务快要完成了，自旋一会
             else if (s == COMPLETING) Thread.yield();
-                // 如果 q 是 null，说明这是第一次进入，创建一个新的节点并保存当前线程引用
+                // 如果q是null，说明这是第一次进入，创建一个新的节点并保存当前线程引用
             else if (q == null) q = new WaitNode();
-                // 如果还没有修改过 waiters 变量，就使用 CAS 修改当前 waiters 为当前节点，这里是一个栈的结构
+                // 如果还没有修改过waiters变量，CAS修改当前waiters为当前节点，这里是栈结构
             else if (!queued) queued = UNSAFE.compareAndSwapObject(this, waitersOffset, q.next = waiters, q);
                 // 根据时间策略挂起当前线程
             else if (timed) {

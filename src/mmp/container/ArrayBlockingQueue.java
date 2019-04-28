@@ -11,7 +11,7 @@ import java.util.Iterator;
 
 /*
  * 数组 有界 大小固定 阻塞 队列 FIFO 不接受 null 元素
- * 使用可重入锁 ReentrantLock 控制队列的访问，两个 Condition 实现生产者-消费者模型
+ * 使用可重入锁ReentrantLock控制队列的访问，两个Condition实现生产者-消费者模型
  * */
 public class ArrayBlockingQueue<E> extends AbstractQueue<E> {
 

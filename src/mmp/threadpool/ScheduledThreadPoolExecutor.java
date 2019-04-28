@@ -1,16 +1,12 @@
 package mmp.threadpool;
 
-import mmp.Callable;
-import mmp.Future;
-import mmp.test.Thread;
 import mmp.container.AbstractQueue;
 import mmp.container.BlockingQueue;
 import mmp.lock.Condition;
 import mmp.lock.ReentrantLock;
 
 import java.util.*;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -116,9 +112,9 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
             // 如果不可以在当前状态下运行，就取消任务（将这个任务的状态设置为CANCELLED）
             if (!canRunInCurrentRunState(periodic)) cancel(false);
 
-                // 如果不是周期性的任务，调用 run 方法
+                // 如果不是周期性的任务，调用run方法
             else if (!periodic) ScheduledFutureTask.super.run();
-                // 如果是周期性的 执行任务，但不设置返回值，成功后返回 true
+                // 如果是周期性的执行任务，但不设置返回值，成功后返回true
             else if (ScheduledFutureTask.super.runAndReset()) {
                 setNextRunTime(); // 设置下次执行时间
                 reExecutePeriodic(outerTask); // 再次将任务添加到队列中
@@ -143,14 +139,14 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
             // 如果线程池关闭了，且不可以在当前状态下运行任务，且从队列删除任务成功，就给任务打上取消标记。
             // 第二个判断是由两个变量控制的（下面是默认值）：
             // continueExistingPeriodicTasksAfterShutdown = false 表示关闭的时候应取消周期性任务。默认关闭
-            // executeExistingDelayedTasksAfterShutdown = true。表示关闭的时候应取消非周期性的任务。默认不关闭。
-            // running 状态下，canRunInCurrentRunState 必定返回 ture。
-            // 非 running 状态下，canRunInCurrentRunState 根据上面的两个值返回。
+            // executeExistingDelayedTasksAfterShutdown = true。表示关闭的时候应取消非周期性的任务。默认不关闭
+            // running状态下，canRunInCurrentRunState 必定返回true
+            // 非running状态下，canRunInCurrentRunState根据上面的两个值返回
 
             // 如果这个过程中线程池关闭了，则判断此时是否应该取消任务
             // 默认如果是周期性的任务，就取消，反之不取消
             if (isShutdown() && !canRunInCurrentRunState(task.isPeriodic()) && remove(task)) task.cancel(false);
-            else ensurePrestart(); // 开始执行任务 如果是周期性的任务，则会在执行完毕后，归还队列
+            else ensurePrestart(); // 开始执行任务,如果是周期性的任务，则会在执行完毕后，归还队列
         }
     }
 
@@ -185,12 +181,12 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         tryTerminate();
     }
 
-    // 修改或替换用于执行 runnable 的任务
+    // 修改或替换用于执行runnable的任务
     protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable, RunnableScheduledFuture<V> task) {
         return task;
     }
 
-    // 修改或替换用于执行 callable 的任务
+    // 修改或替换用于执行callable的任务
     protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable, RunnableScheduledFuture<V> task) {
         return task;
     }
@@ -214,7 +210,7 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
     }
 
 
-    // 创建并执行在给定延迟后启用的 ScheduledFuture
+    // 创建并执行在给定延迟后启用的ScheduledFuture
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
         if (command == null || unit == null) throw new NullPointerException();
         RunnableScheduledFuture<?> t = decorateTask(command, new ScheduledFutureTask<Void>(command, null, triggerTime(delay, unit)));
@@ -270,12 +266,12 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         return schedule(task, 0, NANOSECONDS);
     }
 
-    // 获取有关在此执行程序已 shutdown 的情况下是否继续执行现有定期任务的策略
+    // 获取有关在此执行程序已shutdown的情况下是否继续执行现有定期任务的策略
     public boolean getContinueExistingPeriodicTasksAfterShutdownPolicy() {
         return continueExistingPeriodicTasksAfterShutdown;
     }
 
-    // 获取有关在此执行程序已 shutdown 的情况下是否继续执行现有延迟任务的策略
+    // 获取有关在此执行程序已shutdown的情况下是否继续执行现有延迟任务的策略
     public boolean getExecuteExistingDelayedTasksAfterShutdownPolicy() {
         return executeExistingDelayedTasksAfterShutdown;
     }
@@ -294,7 +290,7 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         return super.getQueue();
     }
 
-    // 阻塞队列 堆 可比较 任务必须实现 compareTo 方法
+    // 阻塞队列，堆，可比较，任务必须实现compareTo方法
     // 比较任务的执行时间，如果任务的执行时间相同，则比较任务的加入时间
     static class DelayedWorkQueue extends AbstractQueue<Runnable> implements BlockingQueue<Runnable> {
 
@@ -312,8 +308,7 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         private final Condition available = lock.newCondition();
 
         private void setIndex(RunnableScheduledFuture<?> f, int idx) {
-            if (f instanceof ScheduledFutureTask)
-                ((ScheduledFutureTask) f).heapIndex = idx;
+            if (f instanceof ScheduledFutureTask) ((ScheduledFutureTask) f).heapIndex = idx;
         }
 
 
@@ -321,8 +316,7 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
             while (k > 0) {
                 int parent = (k - 1) >>> 1;
                 RunnableScheduledFuture<?> e = queue[parent];
-                if (key.compareTo(e) >= 0)
-                    break;
+                if (key.compareTo(e) >= 0) break;
                 queue[k] = e;
                 setIndex(e, k);
                 k = parent;
@@ -337,10 +331,8 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                 int child = (k << 1) + 1;
                 RunnableScheduledFuture<?> c = queue[child];
                 int right = child + 1;
-                if (right < size && c.compareTo(queue[right]) > 0)
-                    c = queue[child = right];
-                if (key.compareTo(c) <= 0)
-                    break;
+                if (right < size && c.compareTo(queue[right]) > 0) c = queue[child = right];
+                if (key.compareTo(c) <= 0) break;
                 queue[k] = c;
                 setIndex(c, k);
                 k = child;
@@ -352,12 +344,9 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         private void grow() {
             int oldCapacity = queue.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1); // grow 50%
-            if (newCapacity < 0) // overflow
-                newCapacity = Integer.MAX_VALUE;
+            if (newCapacity < 0) newCapacity = Integer.MAX_VALUE;
             queue = Arrays.copyOf(queue, newCapacity);
         }
-
-
 
 
         public int size() {
@@ -369,7 +358,6 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                 lock.unlock();
             }
         }
-
 
 
         public RunnableScheduledFuture<?> peek() {
@@ -448,9 +436,9 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                         long delay = first.getDelay(NANOSECONDS);
                         if (delay <= 0) return finishPoll(first);
                         first = null; // don't retain ref while waiting
-                        // 如果 leader 不是空，说明已经有线程在等待了，那就阻塞当前线程
+                        // 如果leader不是空，说明已经有线程在等待了，那就阻塞当前线程
                         if (leader != null) available.await();
-                        // 如果是空，说明队列的第一个元素已经被更新了，就设置当前线程为 leader
+                            // 如果是空，说明队列的第一个元素已经被更新了，就设置当前线程为leader
                         else {
                             Thread thisThread = Thread.currentThread();
                             leader = thisThread;

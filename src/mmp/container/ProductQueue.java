@@ -27,11 +27,11 @@ public class ProductQueue<T> {
     public void put(T t) throws InterruptedException {
         lock.lock();
         try {
-            while (count == getCapacity()) notFull.await(); // 数组满了 释放锁，等待
+            while (count == getCapacity()) notFull.await(); // 数组满了，释放锁，等待
             items[tail] = t;  // 放入数据
-            if (++tail == getCapacity()) tail = 0; // 到最后一个位置了 下标从头开始 防止下标越界
+            if (++tail == getCapacity()) tail = 0; // 到最后一个位置了，下标从头开始，防止下标越界
             ++count;
-            notEmpty.signalAll(); // 通知 take 线程
+            notEmpty.signalAll(); // 通知take线程
         } finally {
             lock.unlock();
         }
@@ -40,12 +40,12 @@ public class ProductQueue<T> {
     public T take() throws InterruptedException {
         lock.lock();
         try {
-            while (count == 0) notEmpty.await(); // 如果数组没有数据 等待
+            while (count == 0) notEmpty.await(); // 如果数组没有数据，等待
             T ret = items[head]; // 取数据
             items[head] = null; // GC
-            if (++head == getCapacity()) head = 0; // 如果到数组尽头了 从头开始
+            if (++head == getCapacity()) head = 0; // 如果到数组尽头了，从头开始
             --count;
-            notFull.signalAll(); // 通知阻塞的 put 线程
+            notFull.signalAll(); // 通知阻塞的put线程
             return ret;
         } finally {
             lock.unlock();

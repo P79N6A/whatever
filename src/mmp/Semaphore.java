@@ -44,7 +44,7 @@ public class Semaphore {
                 // 获得acquires个信号量许可后，剩余的信号量许可数
                 int remaining = available - acquires;
                 // remaining < 0，获取锁失败
-                // remaining > 0，循环尝试用 CAS 将 state 变量更新成 remaining
+                // remaining > 0，循环尝试CAS将state更新成remaining
                 if (remaining < 0 || compareAndSetState(available, remaining)) return remaining;
             }
         }
@@ -56,7 +56,7 @@ public class Semaphore {
                 // 释放releases个许可之后，剩余许可数
                 int next = current + releases;
                 if (next < current) throw new Error("Maximum permit count exceeded");
-                // 循环尝试 CAS设置可获得的许可数为next
+                // 循环尝试CAS设置可获得的许可数为next
                 if (compareAndSetState(current, next)) return true;
             }
         }
@@ -99,7 +99,7 @@ public class Semaphore {
     }
 
 
-    // 许可数 默认非公平
+    // 许可数，默认非公平
     // 信号量为1时 相当于普通的锁
     // 信号量大于1时 共享锁
     public Semaphore(int permits) {
@@ -136,7 +136,7 @@ public class Semaphore {
     }
 
 
-    // 调用时存在一个可用许可，才从信号量获取许可 非阻塞
+    // 调用时存在一个可用许可，才从信号量获取许可，非阻塞
     public boolean tryAcquire() {
         return sync.nonfairTryAcquireShared(1) >= 0;
     }

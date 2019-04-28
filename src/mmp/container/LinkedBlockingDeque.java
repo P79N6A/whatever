@@ -6,7 +6,7 @@ import mmp.lock.ReentrantLock;
 import java.util.Collection;
 
 // Double Ended Queue
-// 双向链表实现的双向并发阻塞队列。
+// 双向链表实现的双向并发阻塞队列
 // 该阻塞队列同时支持FIFO和FILO两种操作方式，即可以从队列的头和尾同时操作(插入/删除)
 // 使用一个可重入锁和这个锁生成的两个条件对象进行并发控制
 public class LinkedBlockingDeque<E> {
