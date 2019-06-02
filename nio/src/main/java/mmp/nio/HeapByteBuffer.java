@@ -1,6 +1,5 @@
 package mmp.nio;
 
-
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
@@ -16,13 +15,11 @@ class HeapByteBuffer extends ByteBuffer {
 
         super(-1, off, off + len, buf.length, buf, 0);
 
-
     }
 
     protected HeapByteBuffer(byte[] buf, int mark, int pos, int lim, int cap, int off) {
 
         super(mark, pos, lim, cap, buf, off);
-
 
     }
 
@@ -33,7 +30,6 @@ class HeapByteBuffer extends ByteBuffer {
     public ByteBuffer duplicate() {
         return new HeapByteBuffer(hb, this.markValue(), this.position(), this.limit(), this.capacity(), offset);
     }
-
 
     protected int ix(int i) {
         return i + offset;
@@ -46,7 +42,6 @@ class HeapByteBuffer extends ByteBuffer {
     public byte get(int i) {
         return hb[ix(checkIndex(i))];
     }
-
 
     public ByteBuffer get(byte[] dst, int offset, int length) {
         checkBounds(offset, length, dst.length);
@@ -61,7 +56,6 @@ class HeapByteBuffer extends ByteBuffer {
         return false;
     }
 
-
     public boolean isReadOnly() {
         return false;
     }
@@ -71,14 +65,12 @@ class HeapByteBuffer extends ByteBuffer {
         hb[ix(nextPutIndex())] = x;
         return this;
 
-
     }
 
     public ByteBuffer put(int i, byte x) {
 
         hb[ix(checkIndex(i))] = x;
         return this;
-
 
     }
 
@@ -90,7 +82,6 @@ class HeapByteBuffer extends ByteBuffer {
         System.arraycopy(src, offset, hb, ix(position()), length);
         position(position() + length);
         return this;
-
 
     }
 
@@ -117,7 +108,6 @@ class HeapByteBuffer extends ByteBuffer {
         }
         return this;
 
-
     }
 
     // 压缩此缓冲区
@@ -136,9 +126,7 @@ class HeapByteBuffer extends ByteBuffer {
         discardMark();
         return this;
 
-
     }
-
 
     byte _get(int i) {
         return hb[i];
@@ -148,9 +136,7 @@ class HeapByteBuffer extends ByteBuffer {
 
         hb[i] = b;
 
-
     }
-
 
     public char getChar() {
         return Bits.getChar(this, ix(nextGetIndex(2)), bigEndian);
@@ -160,12 +146,10 @@ class HeapByteBuffer extends ByteBuffer {
         return Bits.getChar(this, ix(checkIndex(i, 2)), bigEndian);
     }
 
-
     public ByteBuffer putChar(char x) {
 
         Bits.putChar(this, ix(nextPutIndex(2)), x, bigEndian);
         return this;
-
 
     }
 
@@ -174,9 +158,7 @@ class HeapByteBuffer extends ByteBuffer {
         Bits.putChar(this, ix(checkIndex(i, 2)), x, bigEndian);
         return this;
 
-
     }
-
 
     public short getShort() {
         return Bits.getShort(this, ix(nextGetIndex(2)), bigEndian);
@@ -186,12 +168,10 @@ class HeapByteBuffer extends ByteBuffer {
         return Bits.getShort(this, ix(checkIndex(i, 2)), bigEndian);
     }
 
-
     public ByteBuffer putShort(short x) {
 
         Bits.putShort(this, ix(nextPutIndex(2)), x, bigEndian);
         return this;
-
 
     }
 
@@ -200,9 +180,7 @@ class HeapByteBuffer extends ByteBuffer {
         Bits.putShort(this, ix(checkIndex(i, 2)), x, bigEndian);
         return this;
 
-
     }
-
 
     public int getInt() {
         return Bits.getInt(this, ix(nextGetIndex(4)), bigEndian);
@@ -212,12 +190,10 @@ class HeapByteBuffer extends ByteBuffer {
         return Bits.getInt(this, ix(checkIndex(i, 4)), bigEndian);
     }
 
-
     public ByteBuffer putInt(int x) {
 
         Bits.putInt(this, ix(nextPutIndex(4)), x, bigEndian);
         return this;
-
 
     }
 
@@ -226,9 +202,7 @@ class HeapByteBuffer extends ByteBuffer {
         Bits.putInt(this, ix(checkIndex(i, 4)), x, bigEndian);
         return this;
 
-
     }
-
 
     public long getLong() {
         return Bits.getLong(this, ix(nextGetIndex(8)), bigEndian);
@@ -238,12 +212,10 @@ class HeapByteBuffer extends ByteBuffer {
         return Bits.getLong(this, ix(checkIndex(i, 8)), bigEndian);
     }
 
-
     public ByteBuffer putLong(long x) {
 
         Bits.putLong(this, ix(nextPutIndex(8)), x, bigEndian);
         return this;
-
 
     }
 
@@ -252,9 +224,7 @@ class HeapByteBuffer extends ByteBuffer {
         Bits.putLong(this, ix(checkIndex(i, 8)), x, bigEndian);
         return this;
 
-
     }
-
 
     public float getFloat() {
         return Bits.getFloat(this, ix(nextGetIndex(4)), bigEndian);
@@ -264,12 +234,10 @@ class HeapByteBuffer extends ByteBuffer {
         return Bits.getFloat(this, ix(checkIndex(i, 4)), bigEndian);
     }
 
-
     public ByteBuffer putFloat(float x) {
 
         Bits.putFloat(this, ix(nextPutIndex(4)), x, bigEndian);
         return this;
-
 
     }
 
@@ -278,9 +246,7 @@ class HeapByteBuffer extends ByteBuffer {
         Bits.putFloat(this, ix(checkIndex(i, 4)), x, bigEndian);
         return this;
 
-
     }
-
 
     public double getDouble() {
         return Bits.getDouble(this, ix(nextGetIndex(8)), bigEndian);
@@ -290,12 +256,10 @@ class HeapByteBuffer extends ByteBuffer {
         return Bits.getDouble(this, ix(checkIndex(i, 8)), bigEndian);
     }
 
-
     public ByteBuffer putDouble(double x) {
 
         Bits.putDouble(this, ix(nextPutIndex(8)), x, bigEndian);
         return this;
-
 
     }
 
@@ -304,8 +268,6 @@ class HeapByteBuffer extends ByteBuffer {
         Bits.putDouble(this, ix(checkIndex(i, 8)), x, bigEndian);
         return this;
 
-
     }
-
 
 }

@@ -1,17 +1,17 @@
 package mmp.nio;
 
-
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ReadOnlyBufferException;
 
 public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer> {
 
-    // 堆缓冲
+    /**
+     * 堆缓冲
+     */
     final byte[] hb;
     final int offset;
     boolean isReadOnly;
-
 
     ByteBuffer(int mark, int pos, int lim, int cap, byte[] hb, int offset) {
         super(mark, pos, lim, cap);
@@ -23,12 +23,16 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
         this(mark, pos, lim, cap, null, 0);
     }
 
-    // 分配直接缓冲
+    /**
+     * 分配直接缓冲
+     */
     public static ByteBuffer allocateDirect(int capacity) {
         return new DirectByteBuffer(capacity);
     }
 
-    // 创建缓冲区
+    /**
+     * 创建缓冲区
+     */
     public static ByteBuffer allocate(int capacity) {
         if (capacity < 0)
             throw new IllegalArgumentException();
@@ -36,7 +40,9 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
         return new HeapByteBuffer(capacity, capacity);
     }
 
-    // 返回一个新的缓冲，但是array是同一个
+    /**
+     * 返回一个新的缓冲，但是array是同一个
+     */
     public static ByteBuffer wrap(byte[] array, int offset, int length) {
         try {
             return new HeapByteBuffer(array, offset, length);
@@ -49,25 +55,28 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
         return wrap(array, 0, array.length);
     }
 
-
-    // 子缓冲区
+    /**
+     * 子缓冲区
+     */
     public abstract ByteBuffer slice();
 
     public abstract ByteBuffer duplicate();
 
     // public abstract ByteBuffer asReadOnlyBuffer();
 
-    // 获取元素，position++
+    /**
+     * 获取元素，position++
+     */
     public abstract byte get();
 
-    // 存放元素，position++
+    /**
+     * 存放元素，position++
+     */
     public abstract ByteBuffer put(byte b);
 
     public abstract byte get(int index);
 
-
     public abstract ByteBuffer put(int index, byte b);
-
 
     public ByteBuffer get(byte[] dst, int offset, int length) {
         checkBounds(offset, length, dst.length);
@@ -82,7 +91,6 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
     public ByteBuffer get(byte[] dst) {
         return get(dst, 0, dst.length);
     }
-
 
     public ByteBuffer put(ByteBuffer src) {
         if (src == this)
@@ -112,12 +120,10 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
         return put(src, 0, src.length);
     }
 
-
-    // 堆数组 && 不是只读
     public final boolean hasArray() {
+        // 堆数组 && 不是只读
         return (hb != null) && !isReadOnly;
     }
-
 
     public final byte[] array() {
         if (hb == null)
@@ -126,7 +132,6 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
             throw new ReadOnlyBufferException();
         return hb;
     }
-
 
     public final int arrayOffset() {
         if (hb == null)
@@ -139,9 +144,7 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
     //
     public abstract ByteBuffer compact();
 
-
     public abstract boolean isDirect();
-
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -155,7 +158,6 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
         sb.append("]");
         return sb.toString();
     }
-
 
     public int hashCode() {
         int h = 1;
@@ -182,7 +184,6 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
         return true;
     }
 
-    // 比较地址
     private static boolean equals(byte x, byte y) {
         return x == y;
     }
@@ -206,15 +207,12 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
 
     }
 
-
     boolean bigEndian = true;
     boolean nativeByteOrder = (Bits.byteOrder() == ByteOrder.BIG_ENDIAN);
-
 
     public final ByteOrder order() {
         return bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
     }
-
 
     public final ByteBuffer order(ByteOrder bo) {
         bigEndian = (bo == ByteOrder.BIG_ENDIAN);
@@ -222,98 +220,67 @@ public abstract class ByteBuffer extends Buffer implements Comparable<ByteBuffer
         return this;
     }
 
-
     abstract byte _get(int i);
 
     abstract void _put(int i, byte b);
 
-
     public abstract char getChar();
-
 
     public abstract ByteBuffer putChar(char value);
 
-
     public abstract char getChar(int index);
-
 
     public abstract ByteBuffer putChar(int index, char value);
 
-
     // public abstract CharBuffer asCharBuffer();
-
 
     public abstract short getShort();
 
-
     public abstract ByteBuffer putShort(short value);
-
 
     public abstract short getShort(int index);
 
-
     public abstract ByteBuffer putShort(int index, short value);
-
 
     // public abstract ShortBuffer asShortBuffer();
 
-
     public abstract int getInt();
-
 
     public abstract ByteBuffer putInt(int value);
 
-
     public abstract int getInt(int index);
-
 
     public abstract ByteBuffer putInt(int index, int value);
 
-
     // public abstract IntBuffer asIntBuffer();
-
 
     public abstract long getLong();
 
-
     public abstract ByteBuffer putLong(long value);
-
 
     public abstract long getLong(int index);
 
-
     public abstract ByteBuffer putLong(int index, long value);
-
 
     // public abstract LongBuffer asLongBuffer();
 
-
     public abstract float getFloat();
-
 
     public abstract ByteBuffer putFloat(float value);
 
-
     public abstract float getFloat(int index);
-
 
     public abstract ByteBuffer putFloat(int index, float value);
 
-
     // public abstract FloatBuffer asFloatBuffer();
-
 
     public abstract double getDouble();
 
-
     public abstract ByteBuffer putDouble(double value);
-
 
     public abstract double getDouble(int index);
 
-
     public abstract ByteBuffer putDouble(int index, double value);
-
 
     // public abstract DoubleBuffer asDoubleBuffer();
 

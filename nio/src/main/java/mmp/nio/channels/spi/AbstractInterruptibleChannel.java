@@ -8,16 +8,13 @@ import java.io.IOException;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedByInterruptException;
 
-
 public abstract class AbstractInterruptibleChannel implements Channel, InterruptibleChannel {
 
     private final Object closeLock = new Object();
     private volatile boolean open = true;
 
-
     protected AbstractInterruptibleChannel() {
     }
-
 
     public final void close() throws IOException {
         synchronized (closeLock) {
@@ -28,17 +25,14 @@ public abstract class AbstractInterruptibleChannel implements Channel, Interrupt
         }
     }
 
-
     protected abstract void implCloseChannel() throws IOException;
 
     public final boolean isOpen() {
         return open;
     }
 
-
     private Interruptible interruptor;
     private volatile Thread interrupted;
-
 
     protected final void begin() {
         if (interruptor == null) {
@@ -63,7 +57,6 @@ public abstract class AbstractInterruptibleChannel implements Channel, Interrupt
             interruptor.interrupt(me);
     }
 
-
     protected final void end(boolean completed) throws AsynchronousCloseException {
         blockedOn(null);
         Thread interrupted = this.interrupted;
@@ -74,7 +67,6 @@ public abstract class AbstractInterruptibleChannel implements Channel, Interrupt
         if (!completed && !open)
             throw new AsynchronousCloseException();
     }
-
 
     static void blockedOn(Interruptible intr) {
         sun.misc.SharedSecrets.getJavaLangAccess().blockedOn(Thread.currentThread(), intr);

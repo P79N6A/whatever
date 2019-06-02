@@ -8,35 +8,26 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.IllegalBlockingModeException;
 
-
 public abstract class AbstractSelectableChannel extends SelectableChannel {
 
-
     private final SelectorProvider provider;
-
 
     private SelectionKey[] keys = null;
     private int keyCount = 0;
 
-
     private final Object keyLock = new Object();
-
 
     private final Object regLock = new Object();
 
-
     boolean blocking = true;
-
 
     protected AbstractSelectableChannel(SelectorProvider provider) {
         this.provider = provider;
     }
 
-
     public final SelectorProvider provider() {
         return provider;
     }
-
 
     private void addKey(SelectionKey k) {
         assert Thread.holdsLock(keyLock);
@@ -95,7 +86,6 @@ public abstract class AbstractSelectableChannel extends SelectableChannel {
         }
     }
 
-
     public final boolean isRegistered() {
         synchronized (keyLock) {
             return keyCount != 0;
@@ -105,7 +95,6 @@ public abstract class AbstractSelectableChannel extends SelectableChannel {
     public final SelectionKey keyFor(Selector sel) {
         return findKey(sel);
     }
-
 
     public final SelectionKey register(Selector sel, int ops, Object att) throws ClosedChannelException {
         synchronized (regLock) {
@@ -133,7 +122,6 @@ public abstract class AbstractSelectableChannel extends SelectableChannel {
         }
     }
 
-
     protected final void implCloseChannel() throws IOException {
         implCloseSelectableChannel();
         synchronized (keyLock) {
@@ -146,9 +134,7 @@ public abstract class AbstractSelectableChannel extends SelectableChannel {
         }
     }
 
-
     protected abstract void implCloseSelectableChannel() throws IOException;
-
 
     public final boolean isBlocking() {
         synchronized (regLock) {
@@ -159,7 +145,6 @@ public abstract class AbstractSelectableChannel extends SelectableChannel {
     public final Object blockingLock() {
         return regLock;
     }
-
 
     public final SelectableChannel configureBlocking(boolean block) throws IOException {
         synchronized (regLock) {
@@ -174,7 +159,6 @@ public abstract class AbstractSelectableChannel extends SelectableChannel {
         }
         return this;
     }
-
 
     protected abstract void implConfigureBlocking(boolean block) throws IOException;
 

@@ -8,12 +8,10 @@ import sun.misc.VM;
 import java.security.AccessController;
 import java.util.concurrent.atomic.AtomicLong;
 
-
 class Bits {
 
     private Bits() {
     }
-
 
     static short swap(short x) {
         return Short.reverseBytes(x);
@@ -30,7 +28,6 @@ class Bits {
     static long swap(long x) {
         return Long.reverseBytes(x);
     }
-
 
     static private char makeChar(byte b1, byte b0) {
         return (char) ((b1 << 8) | (b0 & 0xff));
@@ -102,7 +99,6 @@ class Bits {
             putCharL(a, x);
     }
 
-
     static private short makeShort(byte b1, byte b0) {
         return (short) ((b1 << 8) | (b0 & 0xff));
     }
@@ -172,7 +168,6 @@ class Bits {
         else
             putShortL(a, x);
     }
-
 
     static private int makeInt(byte b3, byte b2, byte b1, byte b0) {
         return (((b3) << 24) | ((b2 & 0xff) << 16) | ((b1 & 0xff) << 8) | ((b0 & 0xff)));
@@ -259,7 +254,6 @@ class Bits {
         else
             putIntL(a, x);
     }
-
 
     static private long makeLong(byte b7, byte b6, byte b5, byte b4, byte b3, byte b2, byte b1, byte b0) {
         return ((((long) b7) << 56) | (((long) b6 & 0xff) << 48) | (((long) b5 & 0xff) << 40) | (((long) b4 & 0xff) << 32) | (((long) b3 & 0xff) << 24) | (((long) b2 & 0xff) << 16) | (((long) b1 & 0xff) << 8) | (((long) b0 & 0xff)));
@@ -379,7 +373,6 @@ class Bits {
             putLongL(a, x);
     }
 
-
     static float getFloatL(ByteBuffer bb, int bi) {
         return Float.intBitsToFloat(getIntL(bb, bi));
     }
@@ -433,7 +426,6 @@ class Bits {
         else
             putFloatL(a, x);
     }
-
 
     static double getDoubleL(ByteBuffer bb, int bi) {
         return Double.longBitsToDouble(getLongL(bb, bi));
@@ -489,7 +481,6 @@ class Bits {
             putDoubleL(a, x);
     }
 
-
     private static final Unsafe unsafe = Unsafe.getUnsafe();
 
     private static byte _get(long a) {
@@ -503,7 +494,6 @@ class Bits {
     static Unsafe unsafe() {
         return unsafe;
     }
-
 
     private static final ByteOrder byteOrder;
 
@@ -534,7 +524,6 @@ class Bits {
         }
     }
 
-
     private static int pageSize = -1;
 
     static int pageSize() {
@@ -559,16 +548,13 @@ class Bits {
         return unaligned;
     }
 
-
     private static volatile long maxMemory = VM.maxDirectMemory();
     private static final AtomicLong reservedMemory = new AtomicLong();
     private static final AtomicLong totalCapacity = new AtomicLong();
     private static final AtomicLong count = new AtomicLong();
     private static volatile boolean memoryLimitSet = false;
 
-
     private static final int MAX_SLEEPS = 9;
-
 
     static void reserveMemory(long size, int cap) {
 
@@ -577,13 +563,11 @@ class Bits {
             memoryLimitSet = true;
         }
 
-
         if (tryReserveMemory(size, cap)) {
             return;
         }
 
         final JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
-
 
         while (jlra.tryHandlePendingReference()) {
             if (tryReserveMemory(size, cap)) {
@@ -591,9 +575,7 @@ class Bits {
             }
         }
 
-
         System.gc();
-
 
         boolean interrupted = false;
         try {
@@ -617,7 +599,6 @@ class Bits {
                 }
             }
 
-
             throw new OutOfMemoryError("Direct buffer memory");
 
         } finally {
@@ -629,7 +610,6 @@ class Bits {
     }
 
     private static boolean tryReserveMemory(long size, int cap) {
-
 
         long totalCap;
         while (cap <= maxMemory - (totalCap = totalCapacity.get())) {
@@ -643,7 +623,6 @@ class Bits {
         return false;
     }
 
-
     static void unreserveMemory(long size, int cap) {
         long cnt = count.decrementAndGet();
         long reservedMem = reservedMemory.addAndGet(-size);
@@ -651,19 +630,14 @@ class Bits {
         assert cnt >= 0 && reservedMem >= 0 && totalCap >= 0;
     }
 
-
     static {
 
-
     }
-
 
     static final int JNI_COPY_TO_ARRAY_THRESHOLD = 6;
     static final int JNI_COPY_FROM_ARRAY_THRESHOLD = 6;
 
-
     static final long UNSAFE_COPY_THRESHOLD = 1024L * 1024L;
-
 
     static void copyFromArray(Object src, long srcBaseOffset, long srcPos, long dstAddr, long length) {
         long offset = srcBaseOffset + srcPos;
@@ -676,7 +650,6 @@ class Bits {
         }
     }
 
-
     static void copyToArray(long srcAddr, Object dst, long dstBaseOffset, long dstPos, long length) {
         long offset = dstBaseOffset + dstPos;
         while (length > 0) {
@@ -688,41 +661,33 @@ class Bits {
         }
     }
 
-
     static void copyFromCharArray(Object src, long srcPos, long dstAddr, long length) {
         copySwapMemory(src, unsafe.arrayBaseOffset(src.getClass()) + srcPos, null, dstAddr, length, 2);
     }
-
 
     static void copyToCharArray(long srcAddr, Object dst, long dstPos, long length) {
         copySwapMemory(null, srcAddr, dst, unsafe.arrayBaseOffset(dst.getClass()) + dstPos, length, 2);
     }
 
-
     static void copyFromShortArray(Object src, long srcPos, long dstAddr, long length) {
         copySwapMemory(src, unsafe.arrayBaseOffset(src.getClass()) + srcPos, null, dstAddr, length, 2);
     }
-
 
     static void copyToShortArray(long srcAddr, Object dst, long dstPos, long length) {
         copySwapMemory(null, srcAddr, dst, unsafe.arrayBaseOffset(dst.getClass()) + dstPos, length, 2);
     }
 
-
     static void copyFromIntArray(Object src, long srcPos, long dstAddr, long length) {
         copySwapMemory(src, unsafe.arrayBaseOffset(src.getClass()) + srcPos, null, dstAddr, length, 4);
     }
-
 
     static void copyToIntArray(long srcAddr, Object dst, long dstPos, long length) {
         copySwapMemory(null, srcAddr, dst, unsafe.arrayBaseOffset(dst.getClass()) + dstPos, length, 4);
     }
 
-
     static void copyFromLongArray(Object src, long srcPos, long dstAddr, long length) {
         copySwapMemory(src, unsafe.arrayBaseOffset(src.getClass()) + srcPos, null, dstAddr, length, 8);
     }
-
 
     static void copyToLongArray(long srcAddr, Object dst, long dstPos, long length) {
         copySwapMemory(null, srcAddr, dst, unsafe.arrayBaseOffset(dst.getClass()) + dstPos, length, 8);
@@ -734,7 +699,6 @@ class Bits {
     }
 
     private native static void copySwapMemory0(Object srcBase, long srcOffset, Object destBase, long destOffset, long bytes, long elemSize);
-
 
     private static void copySwapMemory(Object srcBase, long srcOffset, Object destBase, long destOffset, long bytes, long elemSize) {
         if (bytes < 0) {
@@ -750,14 +714,12 @@ class Bits {
             throw new NullPointerException();
         }
 
-
         if (srcBase != null && (srcOffset < 0 || !isPrimitiveArray(srcBase.getClass()))) {
             throw new IllegalArgumentException();
         }
         if (destBase != null && (destOffset < 0 || !isPrimitiveArray(destBase.getClass()))) {
             throw new IllegalArgumentException();
         }
-
 
         if (unsafe.addressSize() == 4 && (bytes >>> 32 != 0 || srcOffset >>> 32 != 0 || destOffset >>> 32 != 0)) {
             throw new IllegalArgumentException();

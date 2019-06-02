@@ -1,6 +1,5 @@
 package mmp.threadpool;
 
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
@@ -15,25 +14,34 @@ public abstract class AbstractExecutorService implements ExecutorService {
         return new FutureTask<>(callable);
     }
 
-    // 向线程池提交任务的时候，会创建一个FutureTask返回
+    /**
+     * 向线程池提交任务的时候，会创建一个FutureTask返回
+     */
+    @Override
     public Future<?> submit(Runnable task) {
-        if (task == null) throw new NullPointerException();
+        if (task == null)
+            throw new NullPointerException();
         RunnableFuture<Void> ftask = newTaskFor(task, null);
         execute(ftask);
         return ftask;
     }
 
-
-    //  提交Callable任务，返回Future
+    /**
+     * 提交Callable任务，返回Future
+     */
+    @Override
     public <T> Future<T> submit(Callable<T> task) {
-        if (task == null) throw new NullPointerException();
+        if (task == null)
+            throw new NullPointerException();
         RunnableFuture<T> ftask = newTaskFor(task);
         execute(ftask);
         return ftask;
     }
 
+    @Override
     public <T> Future<T> submit(Runnable task, T result) {
-        if (task == null) throw new NullPointerException();
+        if (task == null)
+            throw new NullPointerException();
         RunnableFuture<T> ftask = newTaskFor(task, result);
         execute(ftask);
         return ftask;

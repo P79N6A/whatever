@@ -3,9 +3,7 @@ package mmp.threadpool;
 import mmp.container.LinkedBlockingQueue;
 import mmp.container.SynchronousQueue;
 
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,14 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Executors {
 
     /*
-    无界队列：默认Integer.MAX_VALUE，可能会耗尽系统内存，危险
-    SynchronousQueue：没有容量，不会保存，高吞吐量，直接创建新的线程，需要设置很大的线程池数，否则容易执行拒绝策略
-    有界队列：如果core满了，则存储在队列中，如果core满了且队列满了，则创建线程，直到maximumPoolSize，如果队列满了且最大线程数已经到了，则执行拒绝策略
-    优先级队列：按照优先级执行任务，也可以设置大小
-    */
+     * 无界队列：默认Integer.MAX_VALUE，可能会耗尽系统内存，危险
+     * SynchronousQueue：没有容量，不会保存，高吞吐量，直接创建新的线程，需要设置很大的线程池数，否则容易执行拒绝策略
+     * 有界队列：如果core满了，则存储在队列中，如果core满了且队列满了，则创建线程，直到maximumPoolSize，如果队列满了且最大线程数已经到了，则执行拒绝策略
+     * 优先级队列：按照优先级执行任务，也可以设置大小
+     */
 
     // 静态工厂方法
-
     public static ExecutorService newFixedThreadPool(int nThreads) {
         // 使用无界队列LinkedBlockingQueue作为WorkQueue而不是有界队列ArrayBlockingQueue
         return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
@@ -39,7 +36,9 @@ public class Executors {
         return new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), threadFactory);
     }
 
-    // 无界线程池，不管多少任务提交进来，都直接运行
+    /**
+     * 无界线程池，不管多少任务提交进来，都直接运行
+     */
     public static ExecutorService newCachedThreadPool() {
         // SynchronousQueue传递任务，并不会保存
         // corePoolSize 0
@@ -51,7 +50,6 @@ public class Executors {
         return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), threadFactory);
     }
 
-
     public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
         return new ScheduledThreadPoolExecutor(corePoolSize);
     }
@@ -60,16 +58,15 @@ public class Executors {
         return new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
     }
 
-
     public static ThreadFactory defaultThreadFactory() {
         return new DefaultThreadFactory();
     }
 
     public static <T> Callable<T> callable(Runnable task, T result) {
-        if (task == null) throw new NullPointerException();
+        if (task == null)
+            throw new NullPointerException();
         return new RunnableAdapter<>(task, result);
     }
-
 
     static final class RunnableAdapter<T> implements Callable<T> {
         final Runnable task;
@@ -80,13 +77,16 @@ public class Executors {
             this.result = result;
         }
 
+        @Override
         public T call() {
             task.run();
             return result;
         }
     }
 
-    // 线程池的所有线程都由线程工厂创建
+    /**
+     * 线程池的所有线程都由线程工厂创建
+     */
     static class DefaultThreadFactory implements ThreadFactory {
         private static final AtomicInteger poolNumber = new AtomicInteger(1);
         private final ThreadGroup group;
@@ -99,14 +99,16 @@ public class Executors {
             namePrefix = "pool-" + poolNumber.getAndIncrement() + "-thread-";
         }
 
+        @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-            if (t.isDaemon()) t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY) t.setPriority(Thread.NORM_PRIORITY);
+            if (t.isDaemon())
+                t.setDaemon(false);
+            if (t.getPriority() != Thread.NORM_PRIORITY)
+                t.setPriority(Thread.NORM_PRIORITY);
             return t;
         }
     }
-
 
     private Executors() {
     }

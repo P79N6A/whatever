@@ -1,13 +1,10 @@
 package mmp.container;
 
 import mmp.lock.LockSupport;
-import mmp.lock.ReentrantLock;
 
-import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-
-import java.util.*;
+import java.util.Map;
 
 public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
 
@@ -78,11 +75,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         public final boolean equals(Object o) {
             Object k, v, u;
             Map.Entry<?, ?> e;
-            return ((o instanceof Map.Entry) &&
-                    (k = (e = (Map.Entry<?, ?>) o).getKey()) != null &&
-                    (v = e.getValue()) != null &&
-                    (k == key || k.equals(key)) &&
-                    (v == (u = val) || v.equals(u)));
+            return ((o instanceof Map.Entry) && (k = (e = (Map.Entry<?, ?>) o).getKey()) != null && (v = e.getValue()) != null && (k == key || k.equals(key)) && (v == (u = val) || v.equals(u)));
         }
 
         ConcurrentHashMap.Node<K, V> find(int h, Object k) {
@@ -135,7 +128,6 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         return (x == null || x.getClass() != kc ? 0 : ((Comparable) k).compareTo(x));
     }
 
-
     @SuppressWarnings("unchecked")
     static final <K, V> ConcurrentHashMap.Node<K, V> tabAt(ConcurrentHashMap.Node<K, V>[] tab, int i) {
         return (ConcurrentHashMap.Node<K, V>) U.getObjectVolatile(tab, ((long) i << ASHIFT) + ABASE);
@@ -148,7 +140,6 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
     static final <K, V> void setTabAt(ConcurrentHashMap.Node<K, V>[] tab, int i, ConcurrentHashMap.Node<K, V> v) {
         U.putObjectVolatile(tab, ((long) i << ASHIFT) + ABASE, v);
     }
-
 
     transient volatile ConcurrentHashMap.Node<K, V>[] table;
 
@@ -164,12 +155,12 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
 
     private transient volatile ConcurrentHashMap.CounterCell[] counterCells;
 
-
     public ConcurrentHashMap() {
     }
 
     public ConcurrentHashMap(int initialCapacity) {
-        if (initialCapacity < 0) throw new IllegalArgumentException();
+        if (initialCapacity < 0)
+            throw new IllegalArgumentException();
         int cap = ((initialCapacity >= (MAXIMUM_CAPACITY >>> 1)) ? MAXIMUM_CAPACITY : tableSizeFor(initialCapacity + (initialCapacity >>> 1) + 1));
         this.sizeCtl = cap;
     }
@@ -179,7 +170,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
     }
 
     public ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
-        if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0) throw new IllegalArgumentException();
+        if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0)
+            throw new IllegalArgumentException();
         if (initialCapacity < concurrencyLevel)   // Use at least as many bins
             initialCapacity = concurrencyLevel;   // as estimated threads
         long size = (long) (1.0 + (long) initialCapacity / loadFactor);
@@ -192,7 +184,6 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         return ((n < 0L) ? 0 : (n > (long) Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) n);
     }
 
-
     public V get(Object key) {
         ConcurrentHashMap.Node<K, V>[] tab;
         ConcurrentHashMap.Node<K, V> e, p;
@@ -201,32 +192,37 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         int h = spread(key.hashCode());
         if ((tab = table) != null && (n = tab.length) > 0 && (e = tabAt(tab, (n - 1) & h)) != null) {
             if ((eh = e.hash) == h) {
-                if ((ek = e.key) == key || (ek != null && key.equals(ek))) return e.val;
-            } else if (eh < 0) return (p = e.find(h, key)) != null ? p.val : null;
+                if ((ek = e.key) == key || (ek != null && key.equals(ek)))
+                    return e.val;
+            } else if (eh < 0)
+                return (p = e.find(h, key)) != null ? p.val : null;
             while ((e = e.next) != null) {
-                if (e.hash == h && ((ek = e.key) == key || (ek != null && key.equals(ek)))) return e.val;
+                if (e.hash == h && ((ek = e.key) == key || (ek != null && key.equals(ek))))
+                    return e.val;
             }
         }
         return null;
     }
-
 
     public V put(K key, V value) {
         return putVal(key, value, false);
     }
 
     final V putVal(K key, V value, boolean onlyIfAbsent) {
-        if (key == null || value == null) throw new NullPointerException();
+        if (key == null || value == null)
+            throw new NullPointerException();
         int hash = spread(key.hashCode());
         int binCount = 0;
         for (ConcurrentHashMap.Node<K, V>[] tab = table; ; ) {
             ConcurrentHashMap.Node<K, V> f;
             int n, i, fh;
-            if (tab == null || (n = tab.length) == 0) tab = initTable();
+            if (tab == null || (n = tab.length) == 0)
+                tab = initTable();
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
                 if (casTabAt(tab, i, null, new ConcurrentHashMap.Node<K, V>(hash, key, value, null)))
                     break;                   // no lock when adding to empty bin
-            } else if ((fh = f.hash) == MOVED) tab = helpTransfer(tab, f);
+            } else if ((fh = f.hash) == MOVED)
+                tab = helpTransfer(tab, f);
             else {
                 V oldVal = null;
                 synchronized (f) {
@@ -237,7 +233,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                                 K ek;
                                 if (e.hash == hash && ((ek = e.key) == key || (ek != null && key.equals(ek)))) {
                                     oldVal = e.val;
-                                    if (!onlyIfAbsent) e.val = value;
+                                    if (!onlyIfAbsent)
+                                        e.val = value;
                                     break;
                                 }
                                 ConcurrentHashMap.Node<K, V> pred = e;
@@ -251,14 +248,17 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                             binCount = 2;
                             if ((p = ((ConcurrentHashMap.TreeBin<K, V>) f).putTreeVal(hash, key, value)) != null) {
                                 oldVal = p.val;
-                                if (!onlyIfAbsent) p.val = value;
+                                if (!onlyIfAbsent)
+                                    p.val = value;
                             }
                         }
                     }
                 }
                 if (binCount != 0) {
-                    if (binCount >= TREEIFY_THRESHOLD) treeifyBin(tab, i);
-                    if (oldVal != null) return oldVal;
+                    if (binCount >= TREEIFY_THRESHOLD)
+                        treeifyBin(tab, i);
+                    if (oldVal != null)
+                        return oldVal;
                     break;
                 }
             }
@@ -267,20 +267,23 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         return null;
     }
 
+    @Override
     public int hashCode() {
         int h = 0;
         ConcurrentHashMap.Node<K, V>[] t;
         if ((t = table) != null) {
             ConcurrentHashMap.Traverser<K, V> it = new ConcurrentHashMap.Traverser<K, V>(t, t.length, 0, t.length);
-            for (ConcurrentHashMap.Node<K, V> p; (p = it.advance()) != null; ) h += p.key.hashCode() ^ p.val.hashCode();
+            for (ConcurrentHashMap.Node<K, V> p; (p = it.advance()) != null; )
+                h += p.key.hashCode() ^ p.val.hashCode();
         }
         return h;
     }
 
-
+    @Override
     public boolean equals(Object o) {
         if (o != this) {
-            if (!(o instanceof Map)) return false;
+            if (!(o instanceof Map))
+                return false;
             Map<?, ?> m = (Map<?, ?>) o;
             ConcurrentHashMap.Node<K, V>[] t;
             int f = (t = table) == null ? 0 : t.length;
@@ -288,7 +291,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             for (ConcurrentHashMap.Node<K, V> p; (p = it.advance()) != null; ) {
                 V val = p.val;
                 Object v = m.get(p.key);
-                if (v == null || (v != val && !v.equals(val))) return false;
+                if (v == null || (v != val && !v.equals(val)))
+                    return false;
             }
             for (Map.Entry<?, ?> e : m.entrySet()) {
                 Object mk, mv, v;
@@ -298,7 +302,6 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         }
         return true;
     }
-
 
     static final class ForwardingNode<K, V> extends ConcurrentHashMap.Node<K, V> {
         final ConcurrentHashMap.Node<K, V>[] nextTable;
@@ -325,14 +328,15 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                         if (e instanceof ConcurrentHashMap.ForwardingNode) {
                             tab = ((ConcurrentHashMap.ForwardingNode<K, V>) e).nextTable;
                             continue outer;
-                        } else return e.find(h, k);
+                        } else
+                            return e.find(h, k);
                     }
-                    if ((e = e.next) == null) return null;
+                    if ((e = e.next) == null)
+                        return null;
                 }
             }
         }
     }
-
 
     static final int resizeStamp(int n) {
         return Integer.numberOfLeadingZeros(n) | (1 << (RESIZE_STAMP_BITS - 1));
@@ -342,13 +346,13 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         ConcurrentHashMap.Node<K, V>[] tab;
         int sc;
         while ((tab = table) == null || tab.length == 0) {
-            if ((sc = sizeCtl) < 0) Thread.yield(); // lost initialization race; just spin
+            if ((sc = sizeCtl) < 0)
+                Thread.yield(); // lost initialization race; just spin
             else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
                 try {
                     if ((tab = table) == null || tab.length == 0) {
                         int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
-                        @SuppressWarnings("unchecked")
-                        ConcurrentHashMap.Node<K, V>[] nt = (ConcurrentHashMap.Node<K, V>[]) new ConcurrentHashMap.Node<?, ?>[n];
+                        @SuppressWarnings("unchecked") ConcurrentHashMap.Node<K, V>[] nt = (ConcurrentHashMap.Node<K, V>[]) new ConcurrentHashMap.Node<?, ?>[n];
                         table = tab = nt;
                         sc = n - (n >>> 2);
                     }
@@ -373,7 +377,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 fullAddCount(x, uncontended);
                 return;
             }
-            if (check <= 1) return;
+            if (check <= 1)
+                return;
             s = sumCount();
         }
         if (check >= 0) {
@@ -384,7 +389,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 if (sc < 0) {
                     if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 || sc == rs + MAX_RESIZERS || (nt = nextTable) == null || transferIndex <= 0)
                         break;
-                    if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1)) transfer(tab, nt);
+                    if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1))
+                        transfer(tab, nt);
                 } else if (U.compareAndSwapInt(this, SIZECTL, sc, (rs << RESIZE_STAMP_SHIFT) + 2))
                     transfer(tab, null);
                 s = sumCount();
@@ -421,8 +427,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
                     try {
                         if (table == tab) {
-                            @SuppressWarnings("unchecked")
-                            ConcurrentHashMap.Node<K, V>[] nt = (ConcurrentHashMap.Node<K, V>[]) new ConcurrentHashMap.Node<?, ?>[n];
+                            @SuppressWarnings("unchecked") ConcurrentHashMap.Node<K, V>[] nt = (ConcurrentHashMap.Node<K, V>[]) new ConcurrentHashMap.Node<?, ?>[n];
                             table = nt;
                             sc = n - (n >>> 2);
                         }
@@ -430,15 +435,18 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                         sizeCtl = sc;
                     }
                 }
-            } else if (c <= sc || n >= MAXIMUM_CAPACITY) break;
+            } else if (c <= sc || n >= MAXIMUM_CAPACITY)
+                break;
             else if (tab == table) {
                 int rs = resizeStamp(n);
                 if (sc < 0) {
                     ConcurrentHashMap.Node<K, V>[] nt;
                     if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 || sc == rs + MAX_RESIZERS || (nt = nextTable) == null || transferIndex <= 0)
                         break;
-                    if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1)) transfer(tab, nt);
-                } else if (U.compareAndSwapInt(this, SIZECTL, sc, (rs << RESIZE_STAMP_SHIFT) + 2)) transfer(tab, null);
+                    if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1))
+                        transfer(tab, nt);
+                } else if (U.compareAndSwapInt(this, SIZECTL, sc, (rs << RESIZE_STAMP_SHIFT) + 2))
+                    transfer(tab, null);
             }
         }
     }
@@ -449,8 +457,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             stride = MIN_TRANSFER_STRIDE; // subdivide range
         if (nextTab == null) {            // initiating
             try {
-                @SuppressWarnings("unchecked")
-                ConcurrentHashMap.Node<K, V>[] nt = (ConcurrentHashMap.Node<K, V>[]) new ConcurrentHashMap.Node<?, ?>[n << 1];
+                @SuppressWarnings("unchecked") ConcurrentHashMap.Node<K, V>[] nt = (ConcurrentHashMap.Node<K, V>[]) new ConcurrentHashMap.Node<?, ?>[n << 1];
                 nextTab = nt;
             } catch (Throwable ex) {      // try to cope with OOME
                 sizeCtl = Integer.MAX_VALUE;
@@ -488,12 +495,15 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                     return;
                 }
                 if (U.compareAndSwapInt(this, SIZECTL, sc = sizeCtl, sc - 1)) {
-                    if ((sc - 2) != resizeStamp(n) << RESIZE_STAMP_SHIFT) return;
+                    if ((sc - 2) != resizeStamp(n) << RESIZE_STAMP_SHIFT)
+                        return;
                     finishing = advance = true;
                     i = n; // recheck before commit
                 }
-            } else if ((f = tabAt(tab, i)) == null) advance = casTabAt(tab, i, null, fwd);
-            else if ((fh = f.hash) == MOVED) advance = true; // already processed
+            } else if ((f = tabAt(tab, i)) == null)
+                advance = casTabAt(tab, i, null, fwd);
+            else if ((fh = f.hash) == MOVED)
+                advance = true; // already processed
             else {
                 synchronized (f) {
                     if (tabAt(tab, i) == f) {
@@ -519,8 +529,10 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                                 int ph = p.hash;
                                 K pk = p.key;
                                 V pv = p.val;
-                                if ((ph & n) == 0) ln = new ConcurrentHashMap.Node<K, V>(ph, pk, pv, ln);
-                                else hn = new ConcurrentHashMap.Node<K, V>(ph, pk, pv, hn);
+                                if ((ph & n) == 0)
+                                    ln = new ConcurrentHashMap.Node<K, V>(ph, pk, pv, ln);
+                                else
+                                    hn = new ConcurrentHashMap.Node<K, V>(ph, pk, pv, hn);
                             }
                             setTabAt(nextTab, i, ln);
                             setTabAt(nextTab, i + n, hn);
@@ -535,13 +547,17 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                                 int h = e.hash;
                                 ConcurrentHashMap.TreeNode<K, V> p = new ConcurrentHashMap.TreeNode<K, V>(h, e.key, e.val, null, null);
                                 if ((h & n) == 0) {
-                                    if ((p.prev = loTail) == null) lo = p;
-                                    else loTail.next = p;
+                                    if ((p.prev = loTail) == null)
+                                        lo = p;
+                                    else
+                                        loTail.next = p;
                                     loTail = p;
                                     ++lc;
                                 } else {
-                                    if ((p.prev = hiTail) == null) hi = p;
-                                    else hiTail.next = p;
+                                    if ((p.prev = hiTail) == null)
+                                        hi = p;
+                                    else
+                                        hiTail.next = p;
                                     hiTail = p;
                                     ++hc;
                                 }
@@ -574,7 +590,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         long sum = baseCount;
         if (as != null) {
             for (int i = 0; i < as.length; ++i) {
-                if ((a = as[i]) != null) sum += a.value;
+                if ((a = as[i]) != null)
+                    sum += a.value;
             }
         }
         return sum;
@@ -610,21 +627,26 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                             } finally {
                                 cellsBusy = 0;
                             }
-                            if (created) break;
+                            if (created)
+                                break;
                             continue;           // Slot is now non-empty
                         }
                     }
                     collide = false;
                 } else if (!wasUncontended)       // CAS already known to fail
                     wasUncontended = true;      // Continue after rehash
-                else if (U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x)) break;
-                else if (counterCells != as || n >= NCPU) collide = false;            // At max size or stale
-                else if (!collide) collide = true;
+                else if (U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))
+                    break;
+                else if (counterCells != as || n >= NCPU)
+                    collide = false;            // At max size or stale
+                else if (!collide)
+                    collide = true;
                 else if (cellsBusy == 0 && U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
                     try {
                         if (counterCells == as) {// Expand table unless stale
                             ConcurrentHashMap.CounterCell[] rs = new ConcurrentHashMap.CounterCell[n << 1];
-                            for (int i = 0; i < n; ++i) rs[i] = as[i];
+                            for (int i = 0; i < n; ++i)
+                                rs[i] = as[i];
                             counterCells = rs;
                         }
                     } finally {
@@ -646,7 +668,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 } finally {
                     cellsBusy = 0;
                 }
-                if (init) break;
+                if (init)
+                    break;
             } else if (U.compareAndSwapLong(this, BASECOUNT, v = baseCount, v + x))
                 break;                          // Fall back on using base
         }
@@ -656,15 +679,18 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         ConcurrentHashMap.Node<K, V> b;
         int n, sc;
         if (tab != null) {
-            if ((n = tab.length) < MIN_TREEIFY_CAPACITY) tryPresize(n << 1);
+            if ((n = tab.length) < MIN_TREEIFY_CAPACITY)
+                tryPresize(n << 1);
             else if ((b = tabAt(tab, index)) != null && b.hash >= 0) {
                 synchronized (b) {
                     if (tabAt(tab, index) == b) {
                         ConcurrentHashMap.TreeNode<K, V> hd = null, tl = null;
                         for (ConcurrentHashMap.Node<K, V> e = b; e != null; e = e.next) {
                             ConcurrentHashMap.TreeNode<K, V> p = new ConcurrentHashMap.TreeNode<K, V>(e.hash, e.key, e.val, null, null);
-                            if ((p.prev = tl) == null) hd = p;
-                            else tl.next = p;
+                            if ((p.prev = tl) == null)
+                                hd = p;
+                            else
+                                tl.next = p;
                             tl = p;
                         }
                         setTabAt(tab, index, new ConcurrentHashMap.TreeBin<K, V>(hd));
@@ -678,8 +704,10 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         ConcurrentHashMap.Node<K, V> hd = null, tl = null;
         for (ConcurrentHashMap.Node<K, V> q = b; q != null; q = q.next) {
             ConcurrentHashMap.Node<K, V> p = new ConcurrentHashMap.Node<K, V>(q.hash, q.key, q.val, null);
-            if (tl == null) hd = p;
-            else tl.next = p;
+            if (tl == null)
+                hd = p;
+            else
+                tl.next = p;
             tl = p;
         }
         return hd;
@@ -709,15 +737,22 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                     K pk;
                     ConcurrentHashMap.TreeNode<K, V> q;
                     ConcurrentHashMap.TreeNode<K, V> pl = p.left, pr = p.right;
-                    if ((ph = p.hash) > h) p = pl;
-                    else if (ph < h) p = pr;
-                    else if ((pk = p.key) == k || (pk != null && k.equals(pk))) return p;
-                    else if (pl == null) p = pr;
-                    else if (pr == null) p = pl;
+                    if ((ph = p.hash) > h)
+                        p = pl;
+                    else if (ph < h)
+                        p = pr;
+                    else if ((pk = p.key) == k || (pk != null && k.equals(pk)))
+                        return p;
+                    else if (pl == null)
+                        p = pr;
+                    else if (pr == null)
+                        p = pl;
                     else if ((kc != null || (kc = comparableClassFor(k)) != null) && (dir = compareComparables(kc, k, pk)) != 0)
                         p = (dir < 0) ? pl : pr;
-                    else if ((q = pr.findTreeNode(h, k, kc)) != null) return q;
-                    else p = pl;
+                    else if ((q = pr.findTreeNode(h, k, kc)) != null)
+                        return q;
+                    else
+                        p = pl;
                 } while (p != null);
             }
             return null;
@@ -759,15 +794,19 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                     for (ConcurrentHashMap.TreeNode<K, V> p = r; ; ) {
                         int dir, ph;
                         K pk = p.key;
-                        if ((ph = p.hash) > h) dir = -1;
-                        else if (ph < h) dir = 1;
+                        if ((ph = p.hash) > h)
+                            dir = -1;
+                        else if (ph < h)
+                            dir = 1;
                         else if ((kc == null && (kc = comparableClassFor(k)) == null) || (dir = compareComparables(kc, k, pk)) == 0)
                             dir = tieBreakOrder(k, pk);
                         ConcurrentHashMap.TreeNode<K, V> xp = p;
                         if ((p = (dir <= 0) ? p.left : p.right) == null) {
                             x.parent = xp;
-                            if (dir <= 0) xp.left = x;
-                            else xp.right = x;
+                            if (dir <= 0)
+                                xp.left = x;
+                            else
+                                xp.right = x;
                             r = balanceInsertion(r, x);
                             break;
                         }
@@ -779,7 +818,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         }
 
         private final void lockRoot() {
-            if (!U.compareAndSwapInt(this, LOCKSTATE, 0, WRITER)) contendedLock(); // offload to separate method
+            if (!U.compareAndSwapInt(this, LOCKSTATE, 0, WRITER))
+                contendedLock(); // offload to separate method
         }
 
         private final void unlockRoot() {
@@ -791,7 +831,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             for (int s; ; ) {
                 if (((s = lockState) & ~WAITER) == 0) {
                     if (U.compareAndSwapInt(this, LOCKSTATE, s, WRITER)) {
-                        if (waiting) waiter = null;
+                        if (waiting)
+                            waiter = null;
                         return;
                     }
                 } else if ((s & WAITER) == 0) {
@@ -810,7 +851,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                     int s;
                     K ek;
                     if (((s = lockState) & (WAITER | WRITER)) != 0) {
-                        if (e.hash == h && ((ek = e.key) == k || (ek != null && k.equals(ek)))) return e;
+                        if (e.hash == h && ((ek = e.key) == k || (ek != null && k.equals(ek))))
+                            return e;
                         e = e.next;
                     } else if (U.compareAndSwapInt(this, LOCKSTATE, s, s + READER)) {
                         ConcurrentHashMap.TreeNode<K, V> r, p;
@@ -837,9 +879,12 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 if (p == null) {
                     first = root = new ConcurrentHashMap.TreeNode<K, V>(h, k, v, null, null);
                     break;
-                } else if ((ph = p.hash) > h) dir = -1;
-                else if (ph < h) dir = 1;
-                else if ((pk = p.key) == k || (pk != null && k.equals(pk))) return p;
+                } else if ((ph = p.hash) > h)
+                    dir = -1;
+                else if (ph < h)
+                    dir = 1;
+                else if ((pk = p.key) == k || (pk != null && k.equals(pk)))
+                    return p;
                 else if ((kc == null && (kc = comparableClassFor(k)) == null) || (dir = compareComparables(kc, k, pk)) == 0) {
                     if (!searched) {
                         ConcurrentHashMap.TreeNode<K, V> q, ch;
@@ -854,10 +899,14 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 if ((p = (dir <= 0) ? p.left : p.right) == null) {
                     ConcurrentHashMap.TreeNode<K, V> x, f = first;
                     first = x = new ConcurrentHashMap.TreeNode<K, V>(h, k, v, f, xp);
-                    if (f != null) f.prev = x;
-                    if (dir <= 0) xp.left = x;
-                    else xp.right = x;
-                    if (!xp.red) x.red = true;
+                    if (f != null)
+                        f.prev = x;
+                    if (dir <= 0)
+                        xp.left = x;
+                    else
+                        xp.right = x;
+                    if (!xp.red)
+                        x.red = true;
                     else {
                         lockRoot();
                         try {
@@ -873,14 +922,17 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             return null;
         }
 
-
         static <K, V> ConcurrentHashMap.TreeNode<K, V> rotateLeft(ConcurrentHashMap.TreeNode<K, V> root, ConcurrentHashMap.TreeNode<K, V> p) {
             ConcurrentHashMap.TreeNode<K, V> r, pp, rl;
             if (p != null && (r = p.right) != null) {
-                if ((rl = p.right = r.left) != null) rl.parent = p;
-                if ((pp = r.parent = p.parent) == null) (root = r).red = false;
-                else if (pp.left == p) pp.left = r;
-                else pp.right = r;
+                if ((rl = p.right = r.left) != null)
+                    rl.parent = p;
+                if ((pp = r.parent = p.parent) == null)
+                    (root = r).red = false;
+                else if (pp.left == p)
+                    pp.left = r;
+                else
+                    pp.right = r;
                 r.left = p;
                 p.parent = r;
             }
@@ -890,10 +942,14 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
         static <K, V> ConcurrentHashMap.TreeNode<K, V> rotateRight(ConcurrentHashMap.TreeNode<K, V> root, ConcurrentHashMap.TreeNode<K, V> p) {
             ConcurrentHashMap.TreeNode<K, V> l, pp, lr;
             if (p != null && (l = p.left) != null) {
-                if ((lr = p.left = l.right) != null) lr.parent = p;
-                if ((pp = l.parent = p.parent) == null) (root = l).red = false;
-                else if (pp.right == p) pp.right = l;
-                else pp.left = l;
+                if ((lr = p.left = l.right) != null)
+                    lr.parent = p;
+                if ((pp = l.parent = p.parent) == null)
+                    (root = l).red = false;
+                else if (pp.right == p)
+                    pp.right = l;
+                else
+                    pp.left = l;
                 l.right = p;
                 p.parent = l;
             }
@@ -906,7 +962,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 if ((xp = x.parent) == null) {
                     x.red = false;
                     return x;
-                } else if (!xp.red || (xpp = xp.parent) == null) return root;
+                } else if (!xp.red || (xpp = xp.parent) == null)
+                    return root;
                 if (xp == (xppl = xpp.left)) {
                     if ((xppr = xpp.right) != null && xppr.red) {
                         xppr.red = false;
@@ -949,17 +1006,24 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             }
         }
 
-
         static <K, V> boolean checkInvariants(ConcurrentHashMap.TreeNode<K, V> t) {
             ConcurrentHashMap.TreeNode<K, V> tp = t.parent, tl = t.left, tr = t.right, tb = t.prev, tn = (ConcurrentHashMap.TreeNode<K, V>) t.next;
-            if (tb != null && tb.next != t) return false;
-            if (tn != null && tn.prev != t) return false;
-            if (tp != null && t != tp.left && t != tp.right) return false;
-            if (tl != null && (tl.parent != t || tl.hash > t.hash)) return false;
-            if (tr != null && (tr.parent != t || tr.hash < t.hash)) return false;
-            if (t.red && tl != null && tl.red && tr != null && tr.red) return false;
-            if (tl != null && !checkInvariants(tl)) return false;
-            if (tr != null && !checkInvariants(tr)) return false;
+            if (tb != null && tb.next != t)
+                return false;
+            if (tn != null && tn.prev != t)
+                return false;
+            if (tp != null && t != tp.left && t != tp.right)
+                return false;
+            if (tl != null && (tl.parent != t || tl.hash > t.hash))
+                return false;
+            if (tr != null && (tr.parent != t || tr.hash < t.hash))
+                return false;
+            if (t.red && tl != null && tl.red && tr != null && tr.red)
+                return false;
+            if (tl != null && !checkInvariants(tl))
+                return false;
+            if (tr != null && !checkInvariants(tr))
+                return false;
             return true;
         }
 
@@ -1003,11 +1067,13 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
 
         final ConcurrentHashMap.Node<K, V> advance() {
             ConcurrentHashMap.Node<K, V> e;
-            if ((e = next) != null) e = e.next;
+            if ((e = next) != null)
+                e = e.next;
             for (; ; ) {
                 ConcurrentHashMap.Node<K, V>[] t;
                 int i, n;  // must use locals in checks
-                if (e != null) return next = e;
+                if (e != null)
+                    return next = e;
                 if (baseIndex >= baseLimit || (t = tab) == null || (n = t.length) <= (i = index) || i < 0)
                     return next = null;
                 if ((e = tabAt(t, i)) != null && e.hash < 0) {
@@ -1016,18 +1082,24 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                         e = null;
                         pushState(t, i, n);
                         continue;
-                    } else if (e instanceof ConcurrentHashMap.TreeBin) e = ((ConcurrentHashMap.TreeBin<K, V>) e).first;
-                    else e = null;
+                    } else if (e instanceof ConcurrentHashMap.TreeBin)
+                        e = ((ConcurrentHashMap.TreeBin<K, V>) e).first;
+                    else
+                        e = null;
                 }
-                if (stack != null) recoverState(n);
-                else if ((index = i + baseSize) >= n) index = ++baseIndex; // visit upper slots if present
+                if (stack != null)
+                    recoverState(n);
+                else if ((index = i + baseSize) >= n)
+                    index = ++baseIndex; // visit upper slots if present
             }
         }
 
         private void pushState(ConcurrentHashMap.Node<K, V>[] t, int i, int n) {
             ConcurrentHashMap.TableStack<K, V> s = spare;  // reuse if possible
-            if (s != null) spare = s.next;
-            else s = new ConcurrentHashMap.TableStack<K, V>();
+            if (s != null)
+                spare = s.next;
+            else
+                s = new ConcurrentHashMap.TableStack<K, V>();
             s.tab = t;
             s.length = n;
             s.index = i;
@@ -1048,13 +1120,12 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
                 stack = next;
                 spare = s;
             }
-            if (s == null && (index += baseSize) >= n) index = ++baseIndex;
+            if (s == null && (index += baseSize) >= n)
+                index = ++baseIndex;
         }
     }
 
-
     // -------------------------------------------------------
-
 
     // Unsafe mechanics
     private static final sun.misc.Unsafe U;
@@ -1079,7 +1150,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V> implements Concur
             Class<?> ak = ConcurrentHashMap.Node[].class;
             ABASE = U.arrayBaseOffset(ak);
             int scale = U.arrayIndexScale(ak);
-            if ((scale & (scale - 1)) != 0) throw new Error("data type scale not a power of two");
+            if ((scale & (scale - 1)) != 0)
+                throw new Error("data type scale not a power of two");
             ASHIFT = 31 - Integer.numberOfLeadingZeros(scale);
         } catch (Exception e) {
             throw new Error(e);

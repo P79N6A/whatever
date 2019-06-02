@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 
-
 public interface MulticastChannel extends NetworkChannel {
 
     @Override

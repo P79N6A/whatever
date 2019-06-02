@@ -5,14 +5,16 @@ import mmp.container.BlockingQueue;
 import mmp.lock.Condition;
 import mmp.lock.ReentrantLock;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
-
 
     private volatile boolean continueExistingPeriodicTasksAfterShutdown;
 
@@ -22,16 +24,16 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
 
     private static final AtomicLong sequencer = new AtomicLong();
 
-
     public ScheduledThreadPoolExecutor(int corePoolSize) {
         super(corePoolSize, Integer.MAX_VALUE, 0, NANOSECONDS, new DelayedWorkQueue());
     }
 
-    // ScheduledThreadPoolExecutor没有最大线程数量，因为内部是个无界队列
+    /**
+     * ScheduledThreadPoolExecutor没有最大线程数量，因为内部是个无界队列
+     */
     public ScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory) {
         super(corePoolSize, Integer.MAX_VALUE, 0, NANOSECONDS, new DelayedWorkQueue(), threadFactory);
     }
-
 
     final long now() {
         return System.nanoTime();
@@ -39,7 +41,9 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
 
     private class ScheduledFutureTask<V> extends FutureTask<V> implements RunnableScheduledFuture<V> {
 
-        // 任务的入队编号
+        /**
+         * 任务的入队编号
+         */
         private final long sequenceNumber;
 
         private long time;
@@ -71,49 +75,63 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
             this.sequenceNumber = sequencer.getAndIncrement();
         }
 
+        @Override
         public long getDelay(TimeUnit unit) {
             return unit.convert(time - now(), NANOSECONDS);
         }
 
+        @Override
         public int compareTo(Delayed other) {
             if (other == this) // compare zero if same object
                 return 0;
             if (other instanceof ScheduledFutureTask) {
                 ScheduledFutureTask<?> x = (ScheduledFutureTask<?>) other;
                 long diff = time - x.time;
-                if (diff < 0) return -1;
-                else if (diff > 0) return 1;
-                else if (sequenceNumber < x.sequenceNumber) return -1;
-                else return 1;
+                if (diff < 0)
+                    return -1;
+                else if (diff > 0)
+                    return 1;
+                else if (sequenceNumber < x.sequenceNumber)
+                    return -1;
+                else
+                    return 1;
             }
             long diff = getDelay(NANOSECONDS) - other.getDelay(NANOSECONDS);
             return (diff < 0) ? -1 : (diff > 0) ? 1 : 0;
         }
 
+        @Override
         public boolean isPeriodic() {
             return period != 0;
         }
 
         private void setNextRunTime() {
             long p = period;
-            if (p > 0) time += p;
-            else time = triggerTime(-p);
+            if (p > 0)
+                time += p;
+            else
+                time = triggerTime(-p);
         }
 
+        @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
             boolean cancelled = super.cancel(mayInterruptIfRunning);
-            if (cancelled && removeOnCancel && heapIndex >= 0) remove(this);
+            if (cancelled && removeOnCancel && heapIndex >= 0)
+                remove(this);
             return cancelled;
         }
 
+        @Override
         public void run() {
             // 是否是周期性任务
             boolean periodic = isPeriodic();
             // 如果不可以在当前状态下运行，就取消任务（将这个任务的状态设置为CANCELLED）
-            if (!canRunInCurrentRunState(periodic)) cancel(false);
+            if (!canRunInCurrentRunState(periodic))
+                cancel(false);
 
                 // 如果不是周期性的任务，调用run方法
-            else if (!periodic) ScheduledFutureTask.super.run();
+            else if (!periodic)
+                ScheduledFutureTask.super.run();
                 // 如果是周期性的执行任务，但不设置返回值，成功后返回true
             else if (ScheduledFutureTask.super.runAndReset()) {
                 setNextRunTime(); // 设置下次执行时间
@@ -128,10 +146,13 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         return isRunningOrShutdown(periodic ? continueExistingPeriodicTasksAfterShutdown : executeExistingDelayedTasksAfterShutdown);
     }
 
-    // 延迟执行
+    /**
+     * 延迟执行
+     */
     private void delayedExecute(RunnableScheduledFuture<?> task) {
         // 是否关闭，关闭则拒绝任务
-        if (isShutdown()) reject(task);
+        if (isShutdown())
+            reject(task);
 
         else {
             // 添加进队列，compareTo
@@ -145,16 +166,20 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
 
             // 如果这个过程中线程池关闭了，则判断此时是否应该取消任务
             // 默认如果是周期性的任务，就取消，反之不取消
-            if (isShutdown() && !canRunInCurrentRunState(task.isPeriodic()) && remove(task)) task.cancel(false);
-            else ensurePrestart(); // 开始执行任务,如果是周期性的任务，则会在执行完毕后，归还队列
+            if (isShutdown() && !canRunInCurrentRunState(task.isPeriodic()) && remove(task))
+                task.cancel(false);
+            else
+                ensurePrestart(); // 开始执行任务,如果是周期性的任务，则会在执行完毕后，归还队列
         }
     }
 
     void reExecutePeriodic(RunnableScheduledFuture<?> task) {
         if (canRunInCurrentRunState(true)) {
             super.getQueue().add(task);
-            if (!canRunInCurrentRunState(true) && remove(task)) task.cancel(false);
-            else ensurePrestart();
+            if (!canRunInCurrentRunState(true) && remove(task))
+                task.cancel(false);
+            else
+                ensurePrestart();
         }
     }
 
@@ -165,7 +190,8 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         boolean keepPeriodic = getContinueExistingPeriodicTasksAfterShutdownPolicy();
         if (!keepDelayed && !keepPeriodic) {
             for (Object e : q.toArray())
-                if (e instanceof RunnableScheduledFuture<?>) ((RunnableScheduledFuture<?>) e).cancel(false);
+                if (e instanceof RunnableScheduledFuture<?>)
+                    ((RunnableScheduledFuture<?>) e).cancel(false);
             q.clear();
         } else {
             // Traverse snapshot to avoid iterator exceptions
@@ -173,7 +199,8 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                 if (e instanceof RunnableScheduledFuture) {
                     RunnableScheduledFuture<?> t = (RunnableScheduledFuture<?>) e;
                     if ((t.isPeriodic() ? !keepPeriodic : !keepDelayed) || t.isCancelled()) { // also remove if already cancelled
-                        if (q.remove(t)) t.cancel(false);
+                        if (q.remove(t))
+                            t.cancel(false);
                     }
                 }
             }
@@ -181,16 +208,19 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         tryTerminate();
     }
 
-    // 修改或替换用于执行runnable的任务
+    /**
+     * 修改或替换用于执行runnable的任务
+     */
     protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable, RunnableScheduledFuture<V> task) {
         return task;
     }
 
-    // 修改或替换用于执行callable的任务
+    /**
+     * 修改或替换用于执行callable的任务
+     */
     protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable, RunnableScheduledFuture<V> task) {
         return task;
     }
-
 
     private long triggerTime(long delay, TimeUnit unit) {
         return triggerTime(unit.toNanos((delay < 0) ? 0 : delay));
@@ -204,31 +234,42 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         Delayed head = (Delayed) super.getQueue().peek();
         if (head != null) {
             long headDelay = head.getDelay(NANOSECONDS);
-            if (headDelay < 0 && (delay - headDelay < 0)) delay = Long.MAX_VALUE + headDelay;
+            if (headDelay < 0 && (delay - headDelay < 0))
+                delay = Long.MAX_VALUE + headDelay;
         }
         return delay;
     }
 
-
-    // 创建并执行在给定延迟后启用的ScheduledFuture
+    /**
+     * 创建并执行在给定延迟后启用的ScheduledFuture
+     */
+    @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        if (command == null || unit == null) throw new NullPointerException();
+        if (command == null || unit == null)
+            throw new NullPointerException();
         RunnableScheduledFuture<?> t = decorateTask(command, new ScheduledFutureTask<Void>(command, null, triggerTime(delay, unit)));
         delayedExecute(t);
         return t;
     }
 
+    @Override
     public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-        if (callable == null || unit == null) throw new NullPointerException();
+        if (callable == null || unit == null)
+            throw new NullPointerException();
         RunnableScheduledFuture<V> t = decorateTask(callable, new ScheduledFutureTask<V>(callable, triggerTime(delay, unit)));
         delayedExecute(t);
         return t;
     }
 
-    // 创建并执行一个在给定初始延迟后首次启用的定期操作
+    /**
+     * 创建并执行一个在给定初始延迟后首次启用的定期操作
+     */
+    @Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-        if (command == null || unit == null) throw new NullPointerException();
-        if (period <= 0) throw new IllegalArgumentException();
+        if (command == null || unit == null)
+            throw new NullPointerException();
+        if (period <= 0)
+            throw new IllegalArgumentException();
         ScheduledFutureTask<Void> sft = new ScheduledFutureTask<Void>(command, null, triggerTime(initialDelay, unit), unit.toNanos(period));
         RunnableScheduledFuture<Void> t = decorateTask(command, sft);
         sft.outerTask = t;
@@ -236,10 +277,15 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         return t;
     }
 
-    // 创建并执行一个在给定初始延迟后首次启用的定期操作
+    /**
+     * 创建并执行一个在给定初始延迟后首次启用的定期操作
+     */
+    @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        if (command == null || unit == null) throw new NullPointerException();
-        if (delay <= 0) throw new IllegalArgumentException();
+        if (command == null || unit == null)
+            throw new NullPointerException();
+        if (delay <= 0)
+            throw new IllegalArgumentException();
         ScheduledFutureTask<Void> sft = new ScheduledFutureTask<Void>(command, null, triggerTime(initialDelay, unit), unit.toNanos(-delay));
         RunnableScheduledFuture<Void> t = decorateTask(command, sft);
         sft.outerTask = t;
@@ -247,51 +293,64 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         return t;
     }
 
+    @Override
     public void execute(Runnable command) {
         schedule(command, 0, NANOSECONDS);
     }
 
-
     // Override AbstractExecutorService methods
 
+    @Override
     public Future<?> submit(Runnable task) {
         return schedule(task, 0, NANOSECONDS);
     }
 
+    @Override
     public <T> Future<T> submit(Runnable task, T result) {
         return schedule(Executors.callable(task, result), 0, NANOSECONDS);
     }
 
+    @Override
     public <T> Future<T> submit(Callable<T> task) {
         return schedule(task, 0, NANOSECONDS);
     }
 
-    // 获取有关在此执行程序已shutdown的情况下是否继续执行现有定期任务的策略
+    /**
+     * 获取有关在此执行程序已shutdown的情况下是否继续执行现有定期任务的策略
+     */
     public boolean getContinueExistingPeriodicTasksAfterShutdownPolicy() {
         return continueExistingPeriodicTasksAfterShutdown;
     }
 
-    // 获取有关在此执行程序已shutdown的情况下是否继续执行现有延迟任务的策略
+    /**
+     * 获取有关在此执行程序已shutdown的情况下是否继续执行现有延迟任务的策略
+     */
     public boolean getExecuteExistingDelayedTasksAfterShutdownPolicy() {
         return executeExistingDelayedTasksAfterShutdown;
     }
 
-
+    @Override
     public void shutdown() {
         super.shutdown();
     }
 
+    @Override
     public List<Runnable> shutdownNow() {
         return super.shutdownNow();
     }
 
-    // 返回任务队列
+    /**
+     * 返回任务队列
+     */
+    @Override
     public BlockingQueue<Runnable> getQueue() {
         return super.getQueue();
     }
 
-    // 阻塞队列，堆，可比较，任务必须实现compareTo方法
-    // 比较任务的执行时间，如果任务的执行时间相同，则比较任务的加入时间
+    /**
+     * 阻塞队列，堆，可比较，任务必须实现compareTo方法
+     * 比较任务的执行时间，如果任务的执行时间相同，则比较任务的加入时间
+     */
     static class DelayedWorkQueue extends AbstractQueue<Runnable> implements BlockingQueue<Runnable> {
 
         private Thread leader = null;
@@ -304,19 +363,19 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
 
         private int size = 0;
 
-
         private final Condition available = lock.newCondition();
 
         private void setIndex(RunnableScheduledFuture<?> f, int idx) {
-            if (f instanceof ScheduledFutureTask) ((ScheduledFutureTask) f).heapIndex = idx;
+            if (f instanceof ScheduledFutureTask)
+                ((ScheduledFutureTask) f).heapIndex = idx;
         }
-
 
         private void siftUp(int k, RunnableScheduledFuture<?> key) {
             while (k > 0) {
                 int parent = (k - 1) >>> 1;
                 RunnableScheduledFuture<?> e = queue[parent];
-                if (key.compareTo(e) >= 0) break;
+                if (key.compareTo(e) >= 0)
+                    break;
                 queue[k] = e;
                 setIndex(e, k);
                 k = parent;
@@ -331,8 +390,10 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                 int child = (k << 1) + 1;
                 RunnableScheduledFuture<?> c = queue[child];
                 int right = child + 1;
-                if (right < size && c.compareTo(queue[right]) > 0) c = queue[child = right];
-                if (key.compareTo(c) <= 0) break;
+                if (right < size && c.compareTo(queue[right]) > 0)
+                    c = queue[child = right];
+                if (key.compareTo(c) <= 0)
+                    break;
                 queue[k] = c;
                 setIndex(c, k);
                 k = child;
@@ -344,11 +405,12 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
         private void grow() {
             int oldCapacity = queue.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1); // grow 50%
-            if (newCapacity < 0) newCapacity = Integer.MAX_VALUE;
+            if (newCapacity < 0)
+                newCapacity = Integer.MAX_VALUE;
             queue = Arrays.copyOf(queue, newCapacity);
         }
 
-
+        @Override
         public int size() {
             final ReentrantLock lock = this.lock;
             lock.lock();
@@ -359,7 +421,7 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
             }
         }
 
-
+        @Override
         public RunnableScheduledFuture<?> peek() {
             final ReentrantLock lock = this.lock;
             lock.lock();
@@ -370,14 +432,17 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
             }
         }
 
+        @Override
         public boolean offer(Runnable x) {
-            if (x == null) throw new NullPointerException();
+            if (x == null)
+                throw new NullPointerException();
             RunnableScheduledFuture<?> e = (RunnableScheduledFuture<?>) x;
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
                 int i = size;
-                if (i >= queue.length) grow();
+                if (i >= queue.length)
+                    grow();
                 size = i + 1;
                 if (i == 0) {
                     queue[0] = e;
@@ -395,49 +460,58 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
             return true;
         }
 
+        @Override
         public void put(Runnable e) {
             offer(e);
         }
 
+        @Override
         public boolean add(Runnable e) {
             return offer(e);
         }
-
 
         private RunnableScheduledFuture<?> finishPoll(RunnableScheduledFuture<?> f) {
             int s = --size;
             RunnableScheduledFuture<?> x = queue[s];
             queue[s] = null;
-            if (s != 0) siftDown(0, x);
+            if (s != 0)
+                siftDown(0, x);
             setIndex(f, -1);
             return f;
         }
 
+        @Override
         public RunnableScheduledFuture<?> poll() {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
                 RunnableScheduledFuture<?> first = queue[0];
-                if (first == null || first.getDelay(NANOSECONDS) > 0) return null;
-                else return finishPoll(first);
+                if (first == null || first.getDelay(NANOSECONDS) > 0)
+                    return null;
+                else
+                    return finishPoll(first);
             } finally {
                 lock.unlock();
             }
         }
 
+        @Override
         public RunnableScheduledFuture<?> take() throws InterruptedException {
             final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
                 for (; ; ) {
                     RunnableScheduledFuture<?> first = queue[0];
-                    if (first == null) available.await();
+                    if (first == null)
+                        available.await();
                     else {
                         long delay = first.getDelay(NANOSECONDS);
-                        if (delay <= 0) return finishPoll(first);
+                        if (delay <= 0)
+                            return finishPoll(first);
                         first = null; // don't retain ref while waiting
                         // 如果leader不是空，说明已经有线程在等待了，那就阻塞当前线程
-                        if (leader != null) available.await();
+                        if (leader != null)
+                            available.await();
                             // 如果是空，说明队列的第一个元素已经被更新了，就设置当前线程为leader
                         else {
                             Thread thisThread = Thread.currentThread();
@@ -445,17 +519,20 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                             try {
                                 available.awaitNanos(delay);
                             } finally {
-                                if (leader == thisThread) leader = null;
+                                if (leader == thisThread)
+                                    leader = null;
                             }
                         }
                     }
                 }
             } finally {
-                if (leader == null && queue[0] != null) available.signal();
+                if (leader == null && queue[0] != null)
+                    available.signal();
                 lock.unlock();
             }
         }
 
+        @Override
         public RunnableScheduledFuture<?> poll(long timeout, TimeUnit unit) throws InterruptedException {
             long nanos = unit.toNanos(timeout);
             final ReentrantLock lock = this.lock;
@@ -464,12 +541,16 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                 for (; ; ) {
                     RunnableScheduledFuture<?> first = queue[0];
                     if (first == null) {
-                        if (nanos <= 0) return null;
-                        else nanos = available.awaitNanos(nanos);
+                        if (nanos <= 0)
+                            return null;
+                        else
+                            nanos = available.awaitNanos(nanos);
                     } else {
                         long delay = first.getDelay(NANOSECONDS);
-                        if (delay <= 0) return finishPoll(first);
-                        if (nanos <= 0) return null;
+                        if (delay <= 0)
+                            return finishPoll(first);
+                        if (nanos <= 0)
+                            return null;
                         first = null; // don't retain ref while waiting
                         if (nanos < delay || leader != null)
                             nanos = available.awaitNanos(nanos);
@@ -480,40 +561,45 @@ public class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements S
                                 long timeLeft = available.awaitNanos(delay);
                                 nanos -= delay - timeLeft;
                             } finally {
-                                if (leader == thisThread) leader = null;
+                                if (leader == thisThread)
+                                    leader = null;
                             }
                         }
                     }
                 }
             } finally {
-                if (leader == null && queue[0] != null) available.signal();
+                if (leader == null && queue[0] != null)
+                    available.signal();
                 lock.unlock();
             }
         }
 
-
+        @Override
         public int drainTo(Collection c) {
             return 1;
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public <T> T[] toArray(T[] a) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
-                if (a.length < size) return (T[]) Arrays.copyOf(queue, size, a.getClass());
+                if (a.length < size)
+                    return (T[]) Arrays.copyOf(queue, size, a.getClass());
                 System.arraycopy(queue, 0, a, 0, size);
-                if (a.length > size) a[size] = null;
+                if (a.length > size)
+                    a[size] = null;
                 return a;
             } finally {
                 lock.unlock();
             }
         }
 
+        @Override
         public Iterator<Runnable> iterator() {
             return null;
         }
-
 
     }
 }

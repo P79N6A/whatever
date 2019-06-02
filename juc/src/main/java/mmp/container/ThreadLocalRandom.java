@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class ThreadLocalRandom extends Random {
 
-
     private static final int PROBE_INCREMENT = 0x9e3779b9;
 
     private static final long SEEDER_INCREMENT = 0xbb67ae8584caa73bL;
@@ -17,18 +16,17 @@ public class ThreadLocalRandom extends Random {
 
     private static final AtomicLong seeder = new AtomicLong(initialSeed());
 
-
     private static long initialSeed() {
         String sec = VM.getSavedProperty("java.util.secureRandomSeed");
         if (Boolean.parseBoolean(sec)) {
             byte[] seedBytes = java.security.SecureRandom.getSeed(8);
             long s = (long) (seedBytes[0]) & 0xffL;
-            for (int i = 1; i < 8; ++i) s = (s << 8) | ((long) (seedBytes[i]) & 0xffL);
+            for (int i = 1; i < 8; ++i)
+                s = (s << 8) | ((long) (seedBytes[i]) & 0xffL);
             return s;
         }
         return (mix64(System.currentTimeMillis()) ^ mix64(System.nanoTime()));
     }
-
 
     private static long mix64(long z) {
         z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
@@ -45,21 +43,20 @@ public class ThreadLocalRandom extends Random {
         UNSAFE.putInt(t, PROBE, probe);
     }
 
-
     static final int getProbe() {
         return UNSAFE.getInt(Thread.currentThread(), PROBE);
     }
 
     static final int advanceProbe(int probe) {
-        probe ^= probe << 13;   // xorshift
+        probe ^= probe << 13; // xorshift
         probe ^= probe >>> 17;
         probe ^= probe << 5;
         UNSAFE.putInt(Thread.currentThread(), PROBE, probe);
         return probe;
     }
 
-
     // Unsafe mechanics
+
     private static final sun.misc.Unsafe UNSAFE;
     private static final long SEED;
     private static final long PROBE;

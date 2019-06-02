@@ -26,8 +26,6 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     public AtomicInteger() {
     }
 
-
-
     public final int getAndSet(int newValue) {
         return unsafe.getAndSetInt(this, valueOffset, newValue);
     }
@@ -35,7 +33,6 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     public final boolean compareAndSet(int expect, int update) {
         return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
     }
-
 
     public final int getAndIncrement() {
         return unsafe.getAndAddInt(this, valueOffset, 1);
@@ -79,8 +76,6 @@ public class AtomicInteger extends Number implements java.io.Serializable {
         return next;
     }
 
-
-
     public final int get() {
         return value;
     }
@@ -89,18 +84,22 @@ public class AtomicInteger extends Number implements java.io.Serializable {
         value = newValue;
     }
 
+    @Override
     public int intValue() {
         return get();
     }
 
+    @Override
     public long longValue() {
         return (long) get();
     }
 
+    @Override
     public float floatValue() {
         return (float) get();
     }
 
+    @Override
     public double doubleValue() {
         return (double) get();
     }

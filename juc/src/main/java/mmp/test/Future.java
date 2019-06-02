@@ -7,7 +7,9 @@ import java.util.concurrent.TimeoutException;
 
 public interface Future<V> {
 
-    // 是否允许取消正在执行却没有执行完毕的任务
+    /**
+     * 是否允许取消正在执行却没有执行完毕的任务
+     */
     boolean cancel(boolean mayInterruptIfRunning);
 
     boolean isCancelled();

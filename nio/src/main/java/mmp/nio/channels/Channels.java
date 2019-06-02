@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.IllegalBlockingModeException;
 
-
 public final class Channels {
 
     private Channels() {
@@ -19,7 +18,6 @@ public final class Channels {
             throw new NullPointerException("\"" + name + "\" is null!");
     }
 
-
     private static void writeFullyImpl(WritableByteChannel ch, ByteBuffer bb) throws IOException {
         while (bb.remaining() > 0) {
             int n = ch.write(bb);
@@ -27,7 +25,6 @@ public final class Channels {
                 throw new RuntimeException("no bytes written");
         }
     }
-
 
     private static void writeFully(WritableByteChannel ch, ByteBuffer bb) throws IOException {
         if (ch instanceof SelectableChannel) {
@@ -41,7 +38,6 @@ public final class Channels {
             writeFullyImpl(ch, bb);
         }
     }
-
 
     public static ReadableByteChannel newChannel(final InputStream in) {
         checkNotNull(in, "in");
@@ -96,10 +92,8 @@ public final class Channels {
         }
     }
 
-
     public static WritableByteChannel newChannel(final OutputStream out) {
         checkNotNull(out, "out");
-
 
         return new WritableByteChannelImpl(out);
     }
@@ -141,6 +135,5 @@ public final class Channels {
             open = false;
         }
     }
-
 
 }

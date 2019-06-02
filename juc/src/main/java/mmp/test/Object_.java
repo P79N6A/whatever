@@ -14,12 +14,11 @@ public class Object_ {
      *
      * */
 
-    /*
+    /**
      * 为何 wait notify notifyAll 不是Thread类中的方法，而是Object类中的方法？
      * 每个对象都拥有monitor（即锁），所以让当前线程等待某个对象的锁，应该通过这个对象来操作
      * 而不是用当前线程来操作，因为当前线程可能会等待多个线程的锁，如果通过线程来操作，就非常复杂了
-     *
-     * */
+     */
     public final native void wait_(long timeout) throws InterruptedException;
 
     public final void wait_(long timeout, int nanos) throws InterruptedException {
@@ -38,17 +37,20 @@ public class Object_ {
         wait_(timeout);
     }
 
-    // 让出 CPU，释放锁，使该线程进入该对象监视器的等待池
-    // 让当前线程交出此对象的监视器，然后进入等待状态
-    // 当前线程必须拥有这个对象的监视器，必须在同步块或者同步方法中进行synchronized
+    /**
+     * 让出CPU，释放锁，使该线程进入该对象监视器的等待池
+     * 让当前线程交出此对象的监视器，然后进入等待状态
+     * 当前线程必须拥有这个对象的监视器，必须在同步块或者同步方法中进行synchronized
+     */
     public final void wait_() throws InterruptedException {
         wait_(0);
     }
 
-
-    // 唤醒一个正在等待该对象监视器的线程
-    // JVM从对象的等待池中随机选择一个线程，把它转到对象的锁池中
-    // 当前线程也必须拥有这个对象的监视器，必须在同步块或者同步方法中进行synchronized
+    /**
+     * 唤醒一个正在等待该对象监视器的线程
+     * JVM从对象的等待池中随机选择一个线程，把它转到对象的锁池中
+     * 当前线程也必须拥有这个对象的监视器，必须在同步块或者同步方法中进行synchronized
+     */
     public final native void notify_();
 
     public final native void notifyAll_();

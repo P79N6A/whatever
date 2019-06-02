@@ -9,14 +9,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
 public abstract class AbstractSelector extends Selector {
 
     private AtomicBoolean selectorOpen = new AtomicBoolean(true);
 
-
     private final SelectorProvider provider;
-
 
     protected AbstractSelector(SelectorProvider provider) {
         this.provider = provider;
@@ -30,7 +27,6 @@ public abstract class AbstractSelector extends Selector {
         }
     }
 
-
     public final void close() throws IOException {
         boolean open = selectorOpen.getAndSet(false);
         if (!open)
@@ -38,34 +34,27 @@ public abstract class AbstractSelector extends Selector {
         implCloseSelector();
     }
 
-
     protected abstract void implCloseSelector() throws IOException;
 
     public final boolean isOpen() {
         return selectorOpen.get();
     }
 
-
     public final SelectorProvider provider() {
         return provider;
     }
-
 
     protected final Set<SelectionKey> cancelledKeys() {
         return cancelledKeys;
     }
 
-
     protected abstract SelectionKey register(AbstractSelectableChannel ch, int ops, Object att);
-
 
     protected final void deregister(AbstractSelectionKey key) {
         ((AbstractSelectableChannel) key.channel()).removeKey(key);
     }
 
-
     private Interruptible interruptor = null;
-
 
     protected final void begin() {
         if (interruptor == null) {
@@ -80,7 +69,6 @@ public abstract class AbstractSelector extends Selector {
         if (me.isInterrupted())
             interruptor.interrupt(me);
     }
-
 
     protected final void end() {
         AbstractInterruptibleChannel.blockedOn(null);

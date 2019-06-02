@@ -14,11 +14,9 @@ import java.nio.channels.FileLock;
 import java.util.Iterator;
 import java.util.Set;
 
-
 public class Test {
 
     public static void main(String[] args) {
-
 
     }
 
@@ -62,12 +60,10 @@ public class Test {
             System.out.println(fileDest.getName() + "文件解除锁定");
         }
 
-
         fileInputStreamChannel.close();
         fileOutputStreamChannel.close();
         fileInputStream.close();
         fileOutputStream.close();
-
 
     }
 
@@ -75,7 +71,6 @@ public class Test {
 
         final int BUF_SIZE = 1024;
         final int TIMEOUT = 3000;
-
 
         // 打开ServerSocketChannel
         ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -98,14 +93,12 @@ public class Test {
         // 在注册的时候加一个附件
         key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT, new Object());
 
-
         while (true) {
             // select方法阻塞地等待Channel就绪，返回值表示有多少个Channel就绪
             if (selector.select(TIMEOUT) == 0) {
                 System.out.print("...");
                 continue;
             }
-
 
             // 有通道就绪了，然后可以访问已关注选择键集合中的就绪通道
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
@@ -128,7 +121,6 @@ public class Test {
                 // 获取附件
                 Object attachedObj = selectionKey.attachment();
 
-
                 // 获取关注事件集
                 int interestSet = selectionKey.interestOps();
 
@@ -137,10 +129,8 @@ public class Test {
                 int isInterestedInRead = interestSet & SelectionKey.OP_READ;
                 int isInterestedInWrite = interestSet & SelectionKey.OP_WRITE;
 
-
                 // 也可以通过这个来判断就绪事件
                 int readySet = selectionKey.readyOps();
-
 
                 if (selectionKey.isAcceptable()) {
                     // 创建SocketChannel有两种：
@@ -185,7 +175,6 @@ public class Test {
                     buf.compact();
                 }
 
-
                 // SelectionKey.OP_ACCEPT
                 // 连接建立完成
                 if (selectionKey.isAcceptable()) {
@@ -209,13 +198,11 @@ public class Test {
                     // a channel is ready for writing
                 }
 
-
             }
 
             serverSocketChannel.close();
 
         }
-
 
     }
 
@@ -252,7 +239,6 @@ public class Test {
         socketChannel.close();
     }
 
-
     private static void test_d() throws Exception {
         ByteBuffer buf = ByteBuffer.allocate(1024);
 
@@ -287,7 +273,6 @@ public class Test {
         int bytesRead = clientChannel.read(buf);
         int bytesWritten = clientChannel.write(buf);
 
-
         //
         DatagramChannel serverChannel = DatagramChannel.open();
         serverChannel.socket().bind(new InetSocketAddress(80));
@@ -295,7 +280,6 @@ public class Test {
         serverChannel.receive(buf);
         // send()方法从DatagramChannel发送数据
         int bytesSent = serverChannel.send(buf, new InetSocketAddress("localhost", 80));
-
 
     }
 

@@ -25,7 +25,6 @@ public class WaitNotify {
             }
         }, "线程 B").start();
 
-
         // synchronized (lock) {
         //     while (flag) {
         //         lock.wait();
@@ -39,6 +38,5 @@ public class WaitNotify {
         // }
 
     }
-
 
 }

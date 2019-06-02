@@ -9,25 +9,19 @@ import java.io.FileDescriptor;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-
 class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
-
 
     protected static final Unsafe unsafe = Bits.unsafe();
 
-
     private static final long arrayBaseOffset = (long) unsafe.arrayBaseOffset(byte[].class);
 
-
     protected static final boolean unaligned = Bits.unaligned();
-
 
     private final Object att;
 
     public Object attachment() {
         return att;
     }
-
 
     private static class Deallocator implements Runnable {
 
@@ -62,7 +56,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return cleaner;
     }
 
-
     DirectByteBuffer(int cap) {
 
         super(-1, 0, cap, cap);
@@ -88,9 +81,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         cleaner = Cleaner.create(this, new Deallocator(base, size, cap));
         att = null;
 
-
     }
-
 
     DirectByteBuffer(long addr, int cap, Object ob) {
         super(-1, 0, cap, cap);
@@ -99,14 +90,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         att = ob;
     }
 
-
     private DirectByteBuffer(long addr, int cap) {
         super(-1, 0, cap, cap);
         address = addr;
         cleaner = null;
         att = null;
     }
-
 
     protected DirectByteBuffer(int cap, long addr, FileDescriptor fd, Runnable unmapper) {
 
@@ -115,9 +104,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         cleaner = Cleaner.create(this, unmapper);
         att = null;
 
-
     }
-
 
     DirectByteBuffer(DirectBuffer db, int mark, int pos, int lim, int cap, int off) {
 
@@ -127,7 +114,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         cleaner = null;
 
         att = db;
-
 
     }
 
@@ -145,7 +131,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return new DirectByteBuffer(this, this.markValue(), this.position(), this.limit(), this.capacity(), 0);
     }
 
-
     public long address() {
         return address;
     }
@@ -162,7 +147,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return ((unsafe.getByte(ix(checkIndex(i)))));
     }
 
-
     public ByteBuffer get(byte[] dst, int offset, int length) {
 
         if (((long) length << 0) > Bits.JNI_COPY_TO_ARRAY_THRESHOLD) {
@@ -174,7 +158,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
             if (length > rem)
                 throw new BufferUnderflowException();
 
-
             Bits.copyToArray(ix(pos), dst, arrayBaseOffset, (long) offset << 0, (long) length << 0);
             position(pos + length);
         } else {
@@ -182,15 +165,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
-
 
     public ByteBuffer put(byte x) {
 
         unsafe.putByte(ix(nextPutIndex()), ((x)));
         return this;
-
 
     }
 
@@ -198,7 +178,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
 
         unsafe.putByte(ix(checkIndex(i)), ((x)));
         return this;
-
 
     }
 
@@ -239,7 +218,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
 
     public ByteBuffer put(byte[] src, int offset, int length) {
@@ -253,14 +231,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
             if (length > rem)
                 throw new BufferOverflowException();
 
-
             Bits.copyFromArray(src, arrayBaseOffset, (long) offset << 0, ix(pos), (long) length << 0);
             position(pos + length);
         } else {
             super.put(src, offset, length);
         }
         return this;
-
 
     }
 
@@ -277,7 +253,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         discardMark();
         return this;
 
-
     }
 
     public boolean isDirect() {
@@ -288,7 +263,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return false;
     }
 
-
     byte _get(int i) {
         return unsafe.getByte(address + i);
     }
@@ -297,9 +271,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
 
         unsafe.putByte(address + i, b);
 
-
     }
-
 
     private char getChar(long a) {
         if (unaligned) {
@@ -317,7 +289,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return getChar(ix(checkIndex(i, (1 << 1))));
     }
 
-
     private ByteBuffer putChar(long a, char x) {
 
         if (unaligned) {
@@ -328,14 +299,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
 
     public ByteBuffer putChar(char x) {
 
         putChar(ix(nextPutIndex((1 << 1))), x);
         return this;
-
 
     }
 
@@ -344,9 +313,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         putChar(ix(checkIndex(i, (1 << 1))), x);
         return this;
 
-
     }
-
 
     private short getShort(long a) {
         if (unaligned) {
@@ -364,7 +331,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return getShort(ix(checkIndex(i, (1 << 1))));
     }
 
-
     private ByteBuffer putShort(long a, short x) {
 
         if (unaligned) {
@@ -375,14 +341,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
 
     public ByteBuffer putShort(short x) {
 
         putShort(ix(nextPutIndex((1 << 1))), x);
         return this;
-
 
     }
 
@@ -391,9 +355,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         putShort(ix(checkIndex(i, (1 << 1))), x);
         return this;
 
-
     }
-
 
     private int getInt(long a) {
         if (unaligned) {
@@ -411,7 +373,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return getInt(ix(checkIndex(i, (1 << 2))));
     }
 
-
     private ByteBuffer putInt(long a, int x) {
 
         if (unaligned) {
@@ -422,14 +383,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
 
     public ByteBuffer putInt(int x) {
 
         putInt(ix(nextPutIndex((1 << 2))), x);
         return this;
-
 
     }
 
@@ -438,9 +397,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         putInt(ix(checkIndex(i, (1 << 2))), x);
         return this;
 
-
     }
-
 
     private long getLong(long a) {
         if (unaligned) {
@@ -458,7 +415,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return getLong(ix(checkIndex(i, (1 << 3))));
     }
 
-
     private ByteBuffer putLong(long a, long x) {
 
         if (unaligned) {
@@ -469,14 +425,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
 
     public ByteBuffer putLong(long x) {
 
         putLong(ix(nextPutIndex((1 << 3))), x);
         return this;
-
 
     }
 
@@ -485,9 +439,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         putLong(ix(checkIndex(i, (1 << 3))), x);
         return this;
 
-
     }
-
 
     private float getFloat(long a) {
         if (unaligned) {
@@ -505,7 +457,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return getFloat(ix(checkIndex(i, (1 << 2))));
     }
 
-
     private ByteBuffer putFloat(long a, float x) {
 
         if (unaligned) {
@@ -516,14 +467,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
 
     public ByteBuffer putFloat(float x) {
 
         putFloat(ix(nextPutIndex((1 << 2))), x);
         return this;
-
 
     }
 
@@ -532,9 +481,7 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         putFloat(ix(checkIndex(i, (1 << 2))), x);
         return this;
 
-
     }
-
 
     private double getDouble(long a) {
         if (unaligned) {
@@ -552,7 +499,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         return getDouble(ix(checkIndex(i, (1 << 3))));
     }
 
-
     private ByteBuffer putDouble(long a, double x) {
 
         if (unaligned) {
@@ -563,14 +509,12 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         }
         return this;
 
-
     }
 
     public ByteBuffer putDouble(double x) {
 
         putDouble(ix(nextPutIndex((1 << 3))), x);
         return this;
-
 
     }
 
@@ -579,8 +523,6 @@ class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
         putDouble(ix(checkIndex(i, (1 << 3))), x);
         return this;
 
-
     }
-
 
 }

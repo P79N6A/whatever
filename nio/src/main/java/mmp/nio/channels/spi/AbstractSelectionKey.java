@@ -2,9 +2,7 @@ package mmp.nio.channels.spi;
 
 import mmp.nio.channels.SelectionKey;
 
-
 public abstract class AbstractSelectionKey extends SelectionKey {
-
 
     protected AbstractSelectionKey() {
     }
@@ -19,9 +17,7 @@ public abstract class AbstractSelectionKey extends SelectionKey {
         valid = false;
     }
 
-
     public final void cancel() {
-
 
         synchronized (this) {
             if (valid) {

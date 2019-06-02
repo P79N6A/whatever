@@ -1,8 +1,8 @@
 package mmp.container;
 
-import mmp.test.Thread;
 import mmp.lock.Condition;
 import mmp.lock.ReentrantLock;
+import mmp.test.Thread;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,28 +11,37 @@ import java.util.PriorityQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-// 无界
-// DelayQueue = BlockingQueue + PriorityQueue + Delayed
-// 应用 ScheduledThreadPoolExecutor
+/**
+ * 无界
+ * DelayQueue = BlockingQueue + PriorityQueue + Delayed
+ * 应用：ScheduledThreadPoolExecutor
+ */
 public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements BlockingQueue<E> {
     private final transient ReentrantLock lock = new ReentrantLock();
 
-    // 内部用于存储对象
+    /**
+     * 内部用于存储对象
+     */
     private final PriorityQueue<E> q = new PriorityQueue<>();
 
+    @Override
     public int size() {
         return 0;
     }
 
+    @Override
     public int drainTo(Collection<? super E> c) {
         return 0;
     }
 
+    @Override
     public Iterator<E> iterator() {
         return Collections.emptyIterator();
     }
 
-    // 当存在多个take线程时，同时只生效一个leader线程
+    /**
+     * 当存在多个take线程时，同时只生效一个leader线程
+     */
     private Thread leader = null;
 
     private final Condition available = lock.newCondition();
@@ -44,15 +53,17 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements B
         this.addAll(c);
     }
 
-
+    @Override
     public boolean add(E e) {
         return offer(e);
     }
 
+    @Override
     public void put(E e) {
         offer(e);
     }
 
+    @Override
     public boolean offer(E e) {
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -69,22 +80,26 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements B
         }
     }
 
-
+    @Override
     public E poll() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
             E first = q.peek();
             // 队列为空或者延迟时间未过期
-            if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) return null;
-            else return q.poll();
+            if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0)
+                return null;
+            else
+                return q.poll();
         } finally {
             lock.unlock();
         }
     }
 
-
-    // take元素，元素未过期需要阻塞
+    /**
+     * take元素，元素未过期需要阻塞
+     */
+    @Override
     public E take() throws InterruptedException {
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
@@ -92,31 +107,38 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements B
             for (; ; ) {
                 E first = q.peek();
                 // 队列空，等待
-                if (first == null) available.await();
+                if (first == null)
+                    available.await();
                 else {
                     // 剩余延迟时间
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     // 到期，poll
-                    if (delay <= 0) return q.poll();
+                    if (delay <= 0)
+                        return q.poll();
                     first = null; // don't retain ref while waiting
                     // 当leader存在时，说明有线程在take了，其它的take线程均为follower，等待
-                    if (leader != null) available.await();
+                    if (leader != null)
+                        available.await();
                         // 当leader不存在时，说明没有其他线程take，当前线程即成为leader，在delay之后，将leader释放
                     else {
                         Thread thisThread = Thread.currentThread();
-                        leader = thisThread; // 设置当前为leader等待
+                        // 设置当前为leader等待
+                        leader = thisThread;
                         try {
-                            available.awaitNanos(delay); // 等待指定时间
+                            // 等待指定时间
+                            available.awaitNanos(delay);
                         } finally {
                             // 检查是否被其他线程改变，没有就重置，再次循环
-                            if (leader == thisThread) leader = null;
+                            if (leader == thisThread)
+                                leader = null;
                         }
                     }
                 }
             }
         } finally {
             // 最后如果队列还有内容，且leader空缺，则signal唤醒挂起的take线程，其中之一将成为新的leader
-            if (leader == null && q.peek() != null) available.signal();
+            if (leader == null && q.peek() != null)
+                available.signal();
             lock.unlock();
         }
     }
@@ -130,6 +152,7 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements B
      * 假设还有线程C 、D、E 持有引用，那么无限期的不能回收该引用，造成内存泄露
      * */
 
+    @Override
     public E poll(long timeout, TimeUnit unit) throws InterruptedException {
         long nanos = unit.toNanos(timeout);
         final ReentrantLock lock = this.lock;
@@ -138,14 +161,19 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements B
             for (; ; ) {
                 E first = q.peek();
                 if (first == null) {
-                    if (nanos <= 0) return null;
-                    else nanos = available.awaitNanos(nanos);
+                    if (nanos <= 0)
+                        return null;
+                    else
+                        nanos = available.awaitNanos(nanos);
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
-                    if (delay <= 0) return q.poll();
-                    if (nanos <= 0) return null;
+                    if (delay <= 0)
+                        return q.poll();
+                    if (nanos <= 0)
+                        return null;
                     first = null; // don't retain ref while waiting
-                    if (nanos < delay || leader != null) nanos = available.awaitNanos(nanos);
+                    if (nanos < delay || leader != null)
+                        nanos = available.awaitNanos(nanos);
                     else {
                         Thread thisThread = Thread.currentThread();
                         leader = thisThread;
@@ -153,18 +181,20 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements B
                             long timeLeft = available.awaitNanos(delay);
                             nanos -= delay - timeLeft;
                         } finally {
-                            if (leader == thisThread) leader = null;
+                            if (leader == thisThread)
+                                leader = null;
                         }
                     }
                 }
             }
         } finally {
-            if (leader == null && q.peek() != null) available.signal();
+            if (leader == null && q.peek() != null)
+                available.signal();
             lock.unlock();
         }
     }
 
-
+    @Override
     public E peek() {
         final ReentrantLock lock = this.lock;
         lock.lock();

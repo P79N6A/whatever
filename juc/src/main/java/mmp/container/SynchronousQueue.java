@@ -2,14 +2,17 @@ package mmp.container;
 
 import mmp.lock.LockSupport;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
-// CAS无锁算法
-// 快速传递元素，元素总是以最快的方式从生产者传递给消费者
-// 应用 Executors.newCachedThreadPool()
+/**
+ * CAS无锁算法
+ * 快速传递元素，元素总是以最快的方式从生产者传递给消费者
+ * 应用：Executors.newCachedThreadPool()
+ */
 public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQueue<E> {
-
 
     abstract static class Transferer<E> {
         abstract E transfer(E e, boolean timed, long nanos);
@@ -22,6 +25,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
     static final int maxUntimedSpins = maxTimedSpins * 16;
 
     static final long spinForTimeoutThreshold = 1000L;
+
     // 非公平 LIFO
     static final class TransferStack<E> extends Transferer<E> {
 
@@ -50,7 +54,6 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
             boolean casNext(SNode cmp, SNode val) {
                 return cmp == next && UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
             }
-
 
             boolean tryMatch(SNode s) {
                 if (match == null && UNSAFE.compareAndSwapObject(this, matchOffset, null, s)) {
@@ -99,7 +102,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
         }
 
         static SNode snode(SNode s, Object e, SNode next, int mode) {
-            if (s == null) s = new SNode(e);
+            if (s == null)
+                s = new SNode(e);
             s.mode = mode;
             s.next = next;
             return s;
@@ -115,15 +119,18 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
                 SNode h = head;
                 if (h == null || h.mode == mode) {  // empty or same-mode
                     if (timed && nanos <= 0) {      // can't wait
-                        if (h != null && h.isCancelled()) casHead(h, h.next);     // pop cancelled node
-                        else return null;
+                        if (h != null && h.isCancelled())
+                            casHead(h, h.next);     // pop cancelled node
+                        else
+                            return null;
                     } else if (casHead(h, s = snode(s, e, h, mode))) {
                         SNode m = awaitFulfill(s, timed, nanos);
                         if (m == s) {               // wait was cancelled
                             clean(s);
                             return null;
                         }
-                        if ((h = head) != null && h.next == s) casHead(h, s.next);     // help s's fulfiller
+                        if ((h = head) != null && h.next == s)
+                            casHead(h, s.next);     // help s's fulfiller
                         return (E) ((mode == REQUEST) ? m.item : s.item);
                     }
                 } else if (!isFulfilling(h.mode)) { // try to fulfill
@@ -166,7 +173,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
             Thread w = Thread.currentThread();
             int spins = (shouldSpin(s) ? (timed ? maxTimedSpins : maxUntimedSpins) : 0);
             for (; ; ) {
-                if (w.isInterrupted()) s.tryCancel();
+                if (w.isInterrupted())
+                    s.tryCancel();
                 SNode m = s.match;
                 if (m != null)
                     return m;
@@ -177,10 +185,14 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
                         continue;
                     }
                 }
-                if (spins > 0) spins = shouldSpin(s) ? (spins - 1) : 0;
-                else if (s.waiter == null) s.waiter = w; // establish waiter so can park next iter
-                else if (!timed) LockSupport.park(this);
-                else if (nanos > spinForTimeoutThreshold) LockSupport.parkNanos(this, nanos);
+                if (spins > 0)
+                    spins = shouldSpin(s) ? (spins - 1) : 0;
+                else if (s.waiter == null)
+                    s.waiter = w; // establish waiter so can park next iter
+                else if (!timed)
+                    LockSupport.park(this);
+                else if (nanos > spinForTimeoutThreshold)
+                    LockSupport.parkNanos(this, nanos);
             }
         }
 
@@ -193,19 +205,22 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
             s.item = null;   // forget item
             s.waiter = null; // forget thread
 
-
             SNode past = s.next;
-            if (past != null && past.isCancelled()) past = past.next;
+            if (past != null && past.isCancelled())
+                past = past.next;
 
             // Absorb cancelled nodes at head
             SNode p;
-            while ((p = head) != null && p != past && p.isCancelled()) casHead(p, p.next);
+            while ((p = head) != null && p != past && p.isCancelled())
+                casHead(p, p.next);
 
             // Unsplice embedded nodes
             while (p != null && p != past) {
                 SNode n = p.next;
-                if (n != null && n.isCancelled()) p.casNext(n, n.next);
-                else p = n;
+                if (n != null && n.isCancelled())
+                    p.casNext(n, n.next);
+                else
+                    p = n;
             }
         }
 
@@ -223,6 +238,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
             }
         }
     }
+
     // 公平 FIFO
     static final class TransferQueue<E> extends Transferer<E> {
 
@@ -294,13 +310,15 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
         }
 
         void advanceTail(QNode t, QNode nt) {
-            if (tail == t) UNSAFE.compareAndSwapObject(this, tailOffset, t, nt);
+            if (tail == t)
+                UNSAFE.compareAndSwapObject(this, tailOffset, t, nt);
         }
 
         boolean casCleanMe(QNode cmp, QNode val) {
             return cleanMe == cmp && UNSAFE.compareAndSwapObject(this, cleanMeOffset, cmp, val);
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         E transfer(E e, boolean timed, long nanos) {
 
@@ -323,7 +341,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
                     }
                     if (timed && nanos <= 0)        // can't wait
                         return null;
-                    if (s == null) s = new QNode(e, isData);
+                    if (s == null)
+                        s = new QNode(e, isData);
                     if (!t.casNext(null, s))        // failed to link in
                         continue;
 
@@ -344,7 +363,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
 
                 } else {                            // complementary-mode
                     QNode m = h.next;               // node to fulfill
-                    if (t != tail || m == null || h != head) continue;                   // inconsistent read
+                    if (t != tail || m == null || h != head)
+                        continue;                   // inconsistent read
 
                     Object x = m.item;
                     if (isData == (x != null) ||    // m already fulfilled
@@ -367,9 +387,11 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
             Thread w = Thread.currentThread();
             int spins = ((head.next == s) ? (timed ? maxTimedSpins : maxUntimedSpins) : 0);
             for (; ; ) {
-                if (w.isInterrupted()) s.tryCancel(e);
+                if (w.isInterrupted())
+                    s.tryCancel(e);
                 Object x = s.item;
-                if (x != e) return x;
+                if (x != e)
+                    return x;
                 if (timed) {
                     nanos = deadline - System.nanoTime();
                     if (nanos <= 0L) {
@@ -377,16 +399,19 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
                         continue;
                     }
                 }
-                if (spins > 0) --spins;
-                else if (s.waiter == null) s.waiter = w;
-                else if (!timed) LockSupport.park(this);
-                else if (nanos > spinForTimeoutThreshold) LockSupport.parkNanos(this, nanos);
+                if (spins > 0)
+                    --spins;
+                else if (s.waiter == null)
+                    s.waiter = w;
+                else if (!timed)
+                    LockSupport.park(this);
+                else if (nanos > spinForTimeoutThreshold)
+                    LockSupport.parkNanos(this, nanos);
             }
         }
 
         void clean(QNode pred, QNode s) {
             s.waiter = null; // forget thread
-
 
             while (pred.next == s) { // Return early if already unlinked
                 QNode h = head;
@@ -396,16 +421,19 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
                     continue;
                 }
                 QNode t = tail;      // Ensure consistent read for tail
-                if (t == h) return;
+                if (t == h)
+                    return;
                 QNode tn = t.next;
-                if (t != tail) continue;
+                if (t != tail)
+                    continue;
                 if (tn != null) {
                     advanceTail(t, tn);
                     continue;
                 }
                 if (s != t) {        // If not tail, try to unsplice
                     QNode sn = s.next;
-                    if (sn == s || pred.casNext(s, sn)) return;
+                    if (sn == s || pred.casNext(s, sn))
+                        return;
                 }
                 QNode dp = cleanMe;
                 if (dp != null) {    // Try unlinking previous cancelled node
@@ -419,8 +447,10 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
                                     dn != d &&                //   that is on list
                                     dp.casNext(d, dn)))       // d unspliced
                         casCleanMe(dp, null);
-                    if (dp == pred) return;      // s is already saved node
-                } else if (casCleanMe(null, pred)) return;          // Postpone cleaning s
+                    if (dp == pred)
+                        return;      // s is already saved node
+                } else if (casCleanMe(null, pred))
+                    return;          // Postpone cleaning s
             }
         }
 
@@ -452,59 +482,78 @@ public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQue
         transferer = fair ? new TransferQueue<>() : new TransferStack<>();
     }
 
-
-    // 数据在生产者和消费者线程之间直接传递
+    /**
+     * 数据在生产者和消费者线程之间直接传递
+     */
+    @Override
     public void put(E e) throws InterruptedException {
-        if (e == null) throw new NullPointerException();
+        if (e == null)
+            throw new NullPointerException();
         if (transferer.transfer(e, false, 0) == null) {
             Thread.interrupted();
             throw new InterruptedException();
         }
     }
 
+    @Override
     public boolean offer(E e) {
-        if (e == null) throw new NullPointerException();
+        if (e == null)
+            throw new NullPointerException();
         return transferer.transfer(e, true, 0) != null;
     }
 
+    @Override
     public E take() throws InterruptedException {
         E e = transferer.transfer(null, false, 0);
-        if (e != null) return e;
+        if (e != null)
+            return e;
         Thread.interrupted();
         throw new InterruptedException();
     }
 
+    @Override
     public E poll(long timeout, TimeUnit unit) throws InterruptedException {
         E e = transferer.transfer(null, true, unit.toNanos(timeout));
-        if (e != null || !Thread.interrupted()) return e;
+        if (e != null || !Thread.interrupted())
+            return e;
         throw new InterruptedException();
     }
 
+    @Override
     public E poll() {
         return transferer.transfer(null, true, 0);
     }
 
+    @Override
     public int size() {
         return 0;
     }
 
-    // 没有数据缓存空间
+    /**
+     * 没有数据缓存空间
+     */
+    @Override
     public E peek() {
         return null;
     }
 
-    // 不允许遍历
+    /**
+     * 不允许遍历
+     */
+
+    @Override
     public Iterator<E> iterator() {
         return Collections.emptyIterator();
     }
 
+    @Override
     public Object[] toArray() {
         return new Object[0];
     }
 
+    @Override
     public int drainTo(Collection<? super E> c) {
         return 0;
     }
-
 
 }

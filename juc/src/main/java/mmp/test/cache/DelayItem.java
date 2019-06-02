@@ -1,6 +1,5 @@
 package mmp.test.cache;
 
-
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -31,20 +30,27 @@ public class DelayItem<T> implements Delayed {
         return this.item;
     }
 
+    @Override
     public long getDelay(TimeUnit unit) {
         return unit.convert(time - now(), TimeUnit.NANOSECONDS);
     }
 
+    @Override
     public int compareTo(Delayed other) {
         // compare zero ONLY if same object
-        if (other == this) return 0;
+        if (other == this)
+            return 0;
         if (other instanceof DelayItem) {
             DelayItem x = (DelayItem) other;
             long diff = time - x.time;
-            if (diff < 0) return -1;
-            else if (diff > 0) return 1;
-            else if (sequenceNumber < x.sequenceNumber) return -1;
-            else return 1;
+            if (diff < 0)
+                return -1;
+            else if (diff > 0)
+                return 1;
+            else if (sequenceNumber < x.sequenceNumber)
+                return -1;
+            else
+                return 1;
         }
         long d = (getDelay(TimeUnit.NANOSECONDS) - other.getDelay(TimeUnit.NANOSECONDS));
         return (d == 0) ? 0 : ((d < 0) ? -1 : 1);

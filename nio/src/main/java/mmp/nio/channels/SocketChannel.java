@@ -39,7 +39,6 @@ public abstract class SocketChannel extends AbstractSelectableChannel implements
         return (SelectionKey.OP_READ | SelectionKey.OP_WRITE | SelectionKey.OP_CONNECT);
     }
 
-
     @Override
     public abstract SocketChannel bind(SocketAddress local) throws IOException;
 
@@ -69,7 +68,6 @@ public abstract class SocketChannel extends AbstractSelectableChannel implements
     public final long read(ByteBuffer[] dsts) throws IOException {
         return read(dsts, 0, dsts.length);
     }
-
 
     public abstract int write(ByteBuffer src) throws IOException;
 

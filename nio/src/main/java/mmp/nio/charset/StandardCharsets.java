@@ -1,6 +1,5 @@
 package mmp.nio.charset;
 
-
 import java.nio.charset.Charset;
 
 public final class StandardCharsets {

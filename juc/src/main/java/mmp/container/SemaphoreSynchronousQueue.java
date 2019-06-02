@@ -1,6 +1,5 @@
 package mmp.container;
 
-
 import mmp.Semaphore;
 
 public class SemaphoreSynchronousQueue<E> {
@@ -18,7 +17,7 @@ public class SemaphoreSynchronousQueue<E> {
         return x;
     }
 
-    public void put (E x) throws InterruptedException{
+    public void put(E x) throws InterruptedException {
         put.acquire();
         item = x;
         take.release();

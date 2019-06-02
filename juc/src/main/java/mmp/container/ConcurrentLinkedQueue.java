@@ -1,6 +1,5 @@
 package mmp.container;
 
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,6 +27,7 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
         }
 
         // Unsafe mechanics
+
         private static final sun.misc.Unsafe UNSAFE;
         private static final long itemOffset;
         private static final long nextOffset;
@@ -48,7 +48,6 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
 
     private transient volatile Node<E> tail;
 
-
     public ConcurrentLinkedQueue() {
         // 头节点和尾节点初始化的时候指向一个空节点
         head = tail = new Node<>(null);
@@ -59,44 +58,49 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
         for (E e : c) {
             checkNotNull(e);
             Node<E> newNode = new Node<>(e);
-            if (h == null) h = t = newNode;
+            if (h == null)
+                h = t = newNode;
             else {
                 t.lazySetNext(newNode);
                 t = newNode;
             }
         }
-        if (h == null) h = t = new Node<>(null);
+        if (h == null)
+            h = t = new Node<>(null);
         head = h;
         tail = t;
     }
 
-
+    @Override
     public boolean add(E e) {
         return offer(e);
     }
 
-
     final void updateHead(Node<E> h, Node<E> p) {
-        if (h != p && casHead(h, p)) h.lazySetNext(h);
+        if (h != p && casHead(h, p))
+            h.lazySetNext(h);
     }
 
-    // 获取当前节点的next元素，如果是自引入节点则返回真正头节点
+    /**
+     * 获取当前节点的next元素，如果是自引入节点则返回真正头节点
+     */
     final Node<E> succ(Node<E> p) {
         Node<E> next = p.next;
         return (p == next) ? head : next;
     }
 
-
-    /*
+    /**
      * 入队的操作都是由CAS算法完成
      * 首先要定位出尾节点，其次使用CAS算法将入队节点设置成尾节点的next节点
      * 如果将tail节点一直指向尾节点
      * 每次即tail->next = newNode;tail = newNode;
      * 但在并发下每次更新tail节点意味着每次都要CAS更新tail节点，这样入队效率必然降低
      * 所以tail节点并不总是指向队列尾节点的原因就是减少更新tail节点的次数，提高入队效率
-     * */
+     */
+    @Override
     public boolean offer(E e) {
-        checkNotNull(e); // 不允许null入队
+        // 不允许null入队
+        checkNotNull(e);
         // 将入队元素构造为Node节点，内部调用unsafe.putObject
         final Node<E> newNode = new Node<>(e);
         // 从尾节点插入
@@ -111,8 +115,10 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
                 if (p.casNext(null, newNode)) {
                     // 线程A CAS插入成功，更新当前尾节点tail（将tail指向队列尾节点），此时p==t 不更新tail
                     // 线程B更新tail成功
-                    if (p != t) casTail(t, newNode); // 更新失败了也OK，表示有其他线程成功更新了tail节点
-                    return true; // 成功
+                    if (p != t)
+                        casTail(t, newNode); // 更新失败了也OK，表示有其他线程成功更新了tail节点
+                    // 成功
+                    return true;
                 }
             }
             // 2 poll
@@ -121,17 +127,18 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
             // 并发环境下，有可能在获得左边的t值后，右边的t值被其他线程修改，这样，t != t 就成立了
             // 表示在比较的过程中，tail被其他线程修改了 就用新的tail为链表的尾，也就是等式右边的t
             // 如果tail没有被修改，则返回head，从头部开始重新查找链表末尾。
-            else if (p == q) p = (t != (t = tail)) ? t : head;
+            else if (p == q)
+                p = (t != (t = tail)) ? t : head;
 
                 // 3
                 // 线程B CAS失败 再次循环进入这里 p==旧的tail q==新插入的node false 执行完后 p==q，然后再次进入循环，p.next==null 进入 1
-            else p = (p != t && t != (t = tail)) ? t : q;
-
+            else
+                p = (p != t && t != (t = tail)) ? t : q;
 
         }
     }
 
-
+    @Override
     public E poll() {
         restartFromHead:
         for (; ; ) {
@@ -148,7 +155,8 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
                     // 类似tail间隔2设置一次头节点（2）
                     // 更新表头然后返回删除元素的值item
                     // 如果 p != h 为true，则更新表头然后返回删除元素的值item
-                    if (p != h) updateHead(h, ((q = p.next) != null) ? q : p);
+                    if (p != h)
+                        updateHead(h, ((q = p.next) != null) ? q : p);
                     // 如果 p != h 为true，则更新表头然后返回删除元素的值item
                     // 说明表头head也不是实时更新的，也是每两次更新一次
                     return item;
@@ -156,17 +164,21 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
                 // 队列为空
                 else if ((q = p.next) == null) {
                     updateHead(h, p);
-                    return null; // 没有其他线程添加元素
+                    // 没有其他线程添加元素
+                    return null;
                 }
                 // 自引用了，则重新找新的队列头节点（4）
-                else if (p == q) continue restartFromHead;
-                else p = q;//(5)
+                else if (p == q)
+                    continue restartFromHead;
+                    // (5)
+                else
+                    p = q;
 
             }
         }
     }
 
-
+    @Override
     public E peek() {
         restartFromHead:
         for (; ; ) {
@@ -175,13 +187,17 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
                 if (item != null || (q = p.next) == null) {
                     updateHead(h, p);
                     return item;
-                } else if (p == q) continue restartFromHead;
-                else p = q;
+                } else if (p == q)
+                    continue restartFromHead;
+                else
+                    p = q;
             }
         }
     }
 
-    // 获取第一个队列元素（哨兵元素不算），没有则为null
+    /**
+     * 获取第一个队列元素（哨兵元素不算），没有则为null
+     */
     Node<E> first() {
         restartFromHead:
         for (; ; ) {
@@ -190,30 +206,35 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
                 if (hasItem || (q = p.next) == null) {
                     updateHead(h, p);
                     return hasItem ? p : null;
-                } else if (p == q) continue restartFromHead;
-                else p = q;
+                } else if (p == q)
+                    continue restartFromHead;
+                else
+                    p = q;
             }
         }
     }
 
-
+    @Override
     public boolean isEmpty() {
         return first() == null;
     }
 
-
-    // 遍历整个队列 效率不高 没有加锁 可能不准
-    // for (int i = 0, int size = concurrentLinkedQueue.size(); i < size;i++)
-    // 不用每次循环都调用一次size方法遍历一遍队列
+    /**
+     * 遍历整个队列 效率不高 没有加锁 可能不准
+     * for (int i = 0, int size = concurrentLinkedQueue.size(); i < size;i++)
+     * 不用每次循环都调用一次size方法遍历一遍队列
+     */
+    @Override
     public int size() {
         int count = 0;
         for (Node<E> p = first(); p != null; p = succ(p))
             if (p.item != null)
-                if (++count == Integer.MAX_VALUE) break;
+                if (++count == Integer.MAX_VALUE)
+                    break;
         return count;
     }
 
-
+    @Override
     public boolean remove(Object o) {
         if (o != null) {
             Node<E> next, pred = null;
@@ -230,14 +251,16 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
 
                 next = succ(p);
                 // unlink
-                if (pred != null && next != null) pred.casNext(p, next);
-                if (removed) return true;
+                if (pred != null && next != null)
+                    pred.casNext(p, next);
+                if (removed)
+                    return true;
             }
         }
         return false;
     }
 
-
+    @Override
     public Iterator<E> iterator() {
         return new Itr();
     }
@@ -285,33 +308,39 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> {
                 } else {
                     // skip over nulls
                     Node<E> next = succ(p);
-                    if (pred != null && next != null) pred.casNext(p, next);
+                    if (pred != null && next != null)
+                        pred.casNext(p, next);
                     p = next;
                 }
             }
         }
 
+        @Override
         public boolean hasNext() {
             return nextNode != null;
         }
 
+        @Override
         public E next() {
-            if (nextNode == null) throw new NoSuchElementException();
+            if (nextNode == null)
+                throw new NoSuchElementException();
             return advance();
         }
 
+        @Override
         public void remove() {
             Node<E> l = lastRet;
-            if (l == null) throw new IllegalStateException();
+            if (l == null)
+                throw new IllegalStateException();
             // rely on a future traversal to relink.
             l.item = null;
             lastRet = null;
         }
     }
 
-
     private static void checkNotNull(Object v) {
-        if (v == null) throw new NullPointerException();
+        if (v == null)
+            throw new NullPointerException();
     }
 
     private boolean casTail(Node<E> cmp, Node<E> val) {

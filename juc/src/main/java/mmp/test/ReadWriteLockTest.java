@@ -1,8 +1,8 @@
 package mmp.test;
 
 import mmp.lock.ReentrantReadWriteLock;
-import java.lang.Thread;
 
+import java.lang.Thread;
 import java.util.Random;
 
 public class ReadWriteLockTest {
@@ -12,7 +12,8 @@ public class ReadWriteLockTest {
 
         for (int i = 0; i < 3; i++) {
             new Thread(() -> {
-                while (true) queue.get();
+                while (true)
+                    queue.get();
             }).start();
         }
 
@@ -25,9 +26,11 @@ public class ReadWriteLockTest {
         }
     }
 
-
     static class Queue {
-        private Object data = null; // 共享数据，一个线程能写，多个线程同时读
+        /**
+         * 共享数据，一个线程能写，多个线程同时读
+         */
+        private Object data = null;
 
         private ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
@@ -57,6 +60,5 @@ public class ReadWriteLockTest {
             rwl.writeLock().unlock(); // 释放写锁
         }
     }
-
 
 }

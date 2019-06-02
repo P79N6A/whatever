@@ -4,14 +4,19 @@ import mmp.Semaphore;
 import mmp.lock.Lock;
 import mmp.lock.ReentrantLock;
 
-// 基于信号量Semaphore的对象池实现
+/**
+ * 基于信号量Semaphore的对象池实现
+ */
 public class ObjectCache<T> {
 
     public interface ObjectFactory<T> {
 
         T build();
     }
-    // FIFO 单向链表
+
+    /**
+     * FIFO 单向链表
+     */
     private class Node {
 
         T obj;
@@ -31,7 +36,9 @@ public class ObjectCache<T> {
 
     private Node tail;
 
-    // 支持capacity个对象
+    /**
+     * 支持capacity个对象
+     */
     public ObjectCache(int capacity, ObjectFactory<T> factory) {
         this.capacity = capacity;
         this.factory = factory;
@@ -45,9 +52,12 @@ public class ObjectCache<T> {
         semaphore.acquire();
         return getNextObject();
     }
-    // 每次从头结点开始取对象
-    // 如果头结点为空就构造一个新的对象返回
-    // 否则将头结点对象取出，并且头结点后移
+
+    /**
+     * 每次从头结点开始取对象
+     * 如果头结点为空就构造一个新的对象返回
+     * 否则将头结点对象取出，并且头结点后移
+     */
     private T getNextObject() {
         // 信号量只是在信号不够的时候挂起线程，不保证信号量足够的时候获取对象和返还对象是线程安全的
         // 所以需要锁Lock来保证并发
@@ -58,7 +68,8 @@ public class ObjectCache<T> {
             } else {
                 Node ret = head;
                 head = head.next;
-                if (head == null) tail = null;
+                if (head == null)
+                    tail = null;
                 ret.next = null;
                 return ret.obj;
             }
@@ -67,8 +78,9 @@ public class ObjectCache<T> {
         }
     }
 
-
-    // 将对象加入FIFO的尾节点，并释放一个空闲的信号量
+    /**
+     * 将对象加入FIFO的尾节点，并释放一个空闲的信号量
+     */
     public void returnObject(T t) {
         returnObjectToPool(t);
         semaphore.release();
@@ -90,7 +102,5 @@ public class ObjectCache<T> {
             lock.unlock();
         }
     }
-
-
 
 }

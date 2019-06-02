@@ -1,12 +1,10 @@
 package mmp.test;
 
-
 import mmp.lock.LockSupport;
 
 import java.lang.Thread;
 
 public class ThreadTest {
-
 
     public static void main(String[] args) {
         Thread.currentThread().interrupt();
@@ -15,7 +13,6 @@ public class ThreadTest {
 
     }
 
-
     private void f() throws Exception {
         // wait方法会释放锁，sleep方法不会释放锁
     }
@@ -23,7 +20,6 @@ public class ThreadTest {
     private void e() throws Exception {
         Thread.yield(); // yield让出CPU时间
     }
-
 
     private void d() throws Exception {
 
@@ -68,12 +64,12 @@ public class ThreadTest {
 
     }
 
-
     private void b() throws Exception {
 
         Thread t1 = new Thread(() -> {
             for (; ; ) {
-                if (Thread.currentThread().isInterrupted()) break;
+                if (Thread.currentThread().isInterrupted())
+                    break;
                 Thread.yield();
             }
         });

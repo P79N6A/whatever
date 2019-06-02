@@ -1,13 +1,20 @@
 package mmp.test;
 
-
 import mmp.atomic.AtomicInteger;
 
-// CLH锁 基于链表 公平 自旋锁
-// 线程只在本地变量上自旋，它不断轮询前驱的状态，如果发现前驱释放了锁就结束自旋
+/**
+ * CLH锁 基于链表 公平 自旋锁
+ * 线程只在本地变量上自旋，它不断轮询前驱的状态，如果发现前驱释放了锁就结束自旋
+ */
 public class TicketLock {
-    private AtomicInteger serviceNum = new AtomicInteger(); // 服务号
-    private AtomicInteger ticketNum = new AtomicInteger(); // 排队号
+    /**
+     * 服务号
+     */
+    private AtomicInteger serviceNum = new AtomicInteger();
+    /**
+     * 排队号
+     */
+    private AtomicInteger ticketNum = new AtomicInteger();
 
     public int lock() {
         // 首先原子性地获得一个排队号
