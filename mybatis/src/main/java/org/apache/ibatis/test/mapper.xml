@@ -1,0 +1,130 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.apache.ibatis.submitted.rounding.Mapper">
+    <!-- 非常复杂的结果映射 -->
+    <resultMap id="detailedBlogResultMap" type="Blog">
+        <constructor>
+            <idArg column="blog_id" javaType="int"/>
+        </constructor>
+        <result property="title" column="blog_title"/>
+        <association property="author" javaType="Author">
+            <id property="id" column="author_id"/>
+            <result property="username" column="author_username"/>
+            <result property="password" column="author_password"/>
+            <result property="email" column="author_email"/>
+            <result property="bio" column="author_bio"/>
+            <result property="favouriteSection" column="author_favourite_section"/>
+        </association>
+        <collection property="posts" ofType="Post">
+            <id property="id" column="post_id"/>
+            <result property="subject" column="post_subject"/>
+            <association property="author" javaType="Author"/>
+            <collection property="comments" ofType="Comment">
+                <id property="id" column="comment_id"/>
+            </collection>
+            <collection property="tags" ofType="Tag">
+                <id property="id" column="tag_id"/>
+            </collection>
+            <discriminator javaType="int" column="draft">
+                <case value="1" resultType="DraftPost"/>
+            </discriminator>
+        </collection>
+    </resultMap>
+    <!-- 一个鉴别器的定义需要指定 column 和 javaType 属性 -->
+    <resultMap id="vehicleResult" type="Vehicle">
+        <id property="id" column="id"/>
+        <result property="vin" column="vin"/>
+        <result property="year" column="year"/>
+        <result property="make" column="make"/>
+        <result property="model" column="model"/>
+        <result property="color" column="color"/>
+        <discriminator javaType="int" column="vehicle_type">
+            <case value="1" resultMap="carResult"/>
+            <case value="2" resultMap="truckResult"/>
+            <case value="3" resultMap="vanResult"/>
+            <case value="4" resultMap="suvResult"/>
+        </discriminator>
+    </resultMap>
+    <!-- 关联的嵌套 Select 查询 -->
+    <resultMap id="blogResult" type="Blog">
+        <association property="author" column="author_id" javaType="Author" select="selectAuthor"/>
+    </resultMap>
+    <select id="selectAuthor" resultType="Author">
+  SELECT * FROM AUTHOR WHERE ID = #{id}
+</select>
+    <resultMap type="org.apache.ibatis.submitted.rounding.User" id="usermap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="funkyNumber" property="funkyNumber"/>
+        <result column="roundingMode" property="roundingMode"/>
+    </resultMap>
+
+    <!-- 某些数据库允许存储过程返回多个结果集，或一次性执行多个语句，每个语句返回一个结果集 -->
+    <select id="selectBlog" resultSets="blogs,authors" resultMap="blogResult" statementType="CALLABLE">
+  {call getBlogsAndAuthors(#{id,jdbcType=INTEGER,mode=IN})}
+</select>
+
+    <!-- 可以使用 resultType 或 resultMap，但不能同时使用，resultType 自动创建一个 ResultMap -->
+    <select id="getUser" resultMap="usermap"
+
+            resultType="hashmap"
+
+            parameterType="int"
+            parameterMap="deprecated"
+
+
+            flushCache="false"
+            useCache="true"
+            timeout="10"
+            fetchSize="256"
+            statementType="PREPARED"
+            resultSetType="FORWARD_ONLY"
+
+    >
+		select * from users
+	</select>
+
+    <select id="selectUserById" statementType="CALLABLE" useCache="false">
+    {call select_user_by_id(
+        #{id, mode=IN},
+        #{userName, mode=OUT, jdbcType=VARCHAR},
+        #{userPassword, mode=OUT, jdbcType=VARCHAR},
+        #{userEmail, mode=OUT, jdbcType=VARCHAR},
+        #{userInfo, mode=OUT, jdbcType=VARCHAR},
+        #{headImg, mode=OUT, jdbcType=BLOB, javaType=_byte[]},
+        #{createTime, mode=OUT, jdbcType=TIMESTAMP}
+    )}
+</select>
+
+
+    <insert id="insert"
+            parameterType="domain.blog.Author"
+            flushCache="true"
+            statementType="PREPARED"
+            keyProperty=""
+            keyColumn=""
+            timeout="20"
+    >
+	    insert into users (id, name, funkyNumber, roundingMode) values (
+	    	#{id}, #{name}, #{funkyNumber}, #{roundingMode}
+	    )
+	</insert>
+
+    <resultMap type="org.apache.ibatis.submitted.rounding.User" id="usermap2">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="funkyNumber" property="funkyNumber"/>
+        <result column="roundingMode" property="roundingMode" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+    </resultMap>
+    <select id="getUser2" resultMap="usermap2">
+		select * from users2
+	</select>
+    <insert id="insert2">
+	    insert into users2 (id, name, funkyNumber, roundingMode) values (
+	    	#{id}, #{name}, #{funkyNumber}, #{roundingMode, typeHandler=org.apache.ibatis.type.EnumTypeHandler}
+	    )
+	</insert>
+
+</mapper>
