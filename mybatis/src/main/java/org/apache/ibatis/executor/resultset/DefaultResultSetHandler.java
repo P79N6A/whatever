@@ -407,6 +407,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         // 创建对象
         Object rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix);
         if (rowValue != null && !hasTypeHandlerForResultObject(rsw, resultMap.getType())) {
+            // 包装对象
             final MetaObject metaObject = configuration.newMetaObject(rowValue);
             boolean foundValues = this.useConstructorMappings;
             // 自动映射
@@ -428,6 +429,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             if (isNested) {
                 return AutoMappingBehavior.FULL == configuration.getAutoMappingBehavior();
             } else {
+                // 一般情况
                 return AutoMappingBehavior.NONE != configuration.getAutoMappingBehavior();
             }
         }
@@ -527,7 +529,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
                     foundValues = true;
                 }
                 if (value != null || (configuration.isCallSettersOnNulls() && !mapping.primitive)) {
-
+                    // 设置值
                     metaObject.setValue(mapping.property, value);
                 }
             }

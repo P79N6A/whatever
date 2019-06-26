@@ -1,5 +1,7 @@
 package org.apache.ibatis.parsing;
 
+import org.apache.ibatis.scripting.xmltags.TextSqlNode;
+
 /**
  * 普通记号解析器，处理#{}和${}参数
  */
@@ -71,6 +73,7 @@ public class GenericTokenParser {
                     builder.append(src, start, src.length - start);
                     offset = src.length;
                 } else {
+                    // expression为open与close间的字符串
                     // 得到一对大括号里的字符串后，调用handler.handleToken，比如替换变量
                     builder.append(handler.handleToken(expression.toString()));
                     offset = end + closeToken.length();
@@ -83,4 +86,6 @@ public class GenericTokenParser {
         }
         return builder.toString();
     }
+
+
 }

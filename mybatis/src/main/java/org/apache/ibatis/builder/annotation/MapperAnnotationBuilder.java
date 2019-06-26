@@ -330,12 +330,12 @@ public class MapperAnnotationBuilder {
             }
 
             String resultMapId = null;
-            // 解析@ResultMap注解，如果有就用它
+            // 解析@ResultMap注解，有就用它
             ResultMap resultMapAnnotation = method.getAnnotation(ResultMap.class);
             if (resultMapAnnotation != null) {
                 resultMapId = String.join(",", resultMapAnnotation.value());
             } else if (isSelect) {
-                // 如果是查询，且没有@ResultMap，则根据返回类型自动解析生成ResultMap
+                // 如果是查询，且没有@ResultMap，解析生成ResultMap
                 resultMapId = parseResultMap(method);
             }
 

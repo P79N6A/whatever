@@ -23,8 +23,11 @@ public class TextSqlNode implements SqlNode {
         this.injectionFilter = injectionFilter;
     }
 
+
+
+
     public boolean isDynamic() {
-        // 去除${xxx}
+        // ${${xxx}}转${xxx}
         DynamicCheckerTokenParser checker = new DynamicCheckerTokenParser();
         GenericTokenParser parser = createParser(checker);
         parser.parse(text);

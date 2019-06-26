@@ -64,6 +64,7 @@ public class PropertyParser {
                 }
             }
             // 否则在content两端添加上${和}
+            // ${xxx} -> ${${xxx}}
             return "${" + content + "}";
         }
     }
