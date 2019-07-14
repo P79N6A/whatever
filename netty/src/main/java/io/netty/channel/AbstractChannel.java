@@ -520,7 +520,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
             // 注册Channel到EventLoop
             AbstractChannel.this.eventLoop = eventLoop;
-            // 当前线程为EventLoop线程直接执行
+            // 当前线程为EventLoop线程直接执行，比如unregister再register
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             }
