@@ -32,6 +32,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
 
     public static void destroyAll() {
         if (LOGGER.isInfoEnabled()) {
+            // [zookeeper://127.0.0.1:2181/org.apache.dubbo.registry.RegistryService?application=dubbo-demo-api-consumer&dubbo=2.0.2&interface=org.apache.dubbo.registry.RegistryService&pid=1004&timestamp=1563110849042]
             // [redis://127.0.0.1:6379/org.apache.dubbo.registry.RegistryService?application=dubbo-demo-api-consumer&dubbo=2.0.2&interface=org.apache.dubbo.registry.RegistryService&pid=6220&timestamp=1562560441186]
             // [redis://127.0.0.1:6379/org.apache.dubbo.registry.RegistryService?application=dubbo-demo-api-provider&dubbo=2.0.2&interface=org.apache.dubbo.registry.RegistryService&pid=4744&timestamp=1562563351247]
             LOGGER.info("Close all registries " + getRegistries());

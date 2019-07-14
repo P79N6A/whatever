@@ -35,8 +35,6 @@ import static org.apache.dubbo.common.constants.RegistryConstants.EXTRA_KEYS_KEY
 public class RegistryConfig extends AbstractConfig {
 
 
-
-
     public static final String NO_AVAILABLE = "N/A";
 
     private static final long serialVersionUID = 5508512956753757169L;

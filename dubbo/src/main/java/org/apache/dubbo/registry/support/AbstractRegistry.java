@@ -180,7 +180,6 @@ public abstract class AbstractRegistry implements Registry {
                     // }
 
 
-
                     // {
                     // org.apache.dubbo.demo.DemoService:1.0.0=empty://192.168.1.108/org.apache.dubbo.demo.DemoService?application=dubbo-demo-api-consumer&category=routers&dubbo=2.0.2&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=10648&revision=1.0.0&side=consumer&sticky=false&timestamp=1562324853108&version=1.0.0 empty://192.168.1.108/org.apache.dubbo.demo.DemoService?application=dubbo-demo-api-consumer&category=configurators&dubbo=2.0.2&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=10648&revision=1.0.0&side=consumer&sticky=false&timestamp=1562324853108&version=1.0.0
                     // dubbo://192.168.1.108:20880/org.apache.dubbo.demo.DemoService?anyhost=true&application=dubbo-demo-api-provider&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=7504&register=true&release=&revision=1.0.0&side=provider&timestamp=1562323846894&version=1.0.0
@@ -516,6 +515,8 @@ public abstract class AbstractRegistry implements Registry {
             return;
         }
         if (logger.isInfoEnabled()) {
+            // url provider://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&category=configurators&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
+            // urls: [empty://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&category=configurators&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0]
             logger.info("Notify urls for subscribe url " + url + ", urls: " + urls);
         }
         Map<String, List<URL>> result = new HashMap<>();
@@ -583,6 +584,9 @@ public abstract class AbstractRegistry implements Registry {
             // &interface=org.apache.dubbo.registry.RegistryService
             // &pid=4744
             // &timestamp=1562563351247
+
+
+            // zookeeper://127.0.0.1:2181/org.apache.dubbo.registry.RegistryService?application=dubbo-demo-api-consumer&dubbo=2.0.2&interface=org.apache.dubbo.registry.RegistryService&pid=1004&timestamp=1563110849042
             logger.info("Destroy registry:" + getUrl());
         }
         Set<URL> destroyRegistered = new HashSet<>(getRegistered());

@@ -94,6 +94,7 @@ public class RegistryProtocol implements Protocol {
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
     }
+
     /**
      * 注入
      */
@@ -107,6 +108,7 @@ public class RegistryProtocol implements Protocol {
     public void setRegistryFactory(RegistryFactory registryFactory) {
         this.registryFactory = registryFactory;
     }
+
     /**
      * 注入
      */
@@ -124,8 +126,10 @@ public class RegistryProtocol implements Protocol {
     }
 
     public void register(URL registryUrl, URL registeredProviderUrl) {
-
+        // zookeeper://127.0.0.1:2181/org.apache.dubbo.registry.RegistryService?application=dubbo-demo-api-provider&dubbo=2.0.2&export=dubbo%3A%2F%2F192.168.1.100%3A20880%2Forg.apache.dubbo.demo.DemoService%3A1.0.0%3Fanyhost%3Dtrue%26application%3Ddubbo-demo-api-provider%26bind.ip%3D192.168.1.100%26bind.port%3D20880%26deprecated%3Dfalse%26dubbo%3D2.0.2%26dynamic%3Dtrue%26generic%3Dfalse%26interface%3Dorg.apache.dubbo.demo.DemoService%26methods%3DsayHello%26pid%3D3580%26register%3Dtrue%26release%3D%26revision%3D1.0.0%26sayHello.timeout%3D1000%26side%3Dprovider%26timestamp%3D1563110838271%26version%3D1.0.0&pid=3580&timestamp=1563110838261
         logger.debug("registryUrl: " + registryUrl);
+
+        // dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
         logger.debug("registeredProviderUrl: " + registeredProviderUrl);
 
         // 获取Registry
@@ -152,7 +156,7 @@ public class RegistryProtocol implements Protocol {
         // 获取注册中心URL，以zookeeper为例，得到的URL如下：
         // zookeeper://127.0.0.1:2181/org.apache.dubbo.registry.RegistryService?application=dubbo-demo-api-provider
         // &dubbo=2.0.2
-        // &export=dubbo%3A%2F%2F127.0.0.1%3A20880%2Forg.apache.dubbo.demo.DemoService%3Fanyhost%3Dtrue%26application%3Ddubbo-demo-api-provider
+        // &export=dubbo%3A%2F%2F192.168.1.100%3A20880%2Forg.apache.dubbo.demo.DemoService%3Fanyhost%3Dtrue%26application%3Ddubbo-demo-api-provider
         URL registryUrl = getRegistryUrl(originInvoker);
         URL providerUrl = getProviderUrl(originInvoker);
 
@@ -160,7 +164,7 @@ public class RegistryProtocol implements Protocol {
         logger.debug("providerUrl: " + providerUrl);
 
         // 获取订阅URL，如：
-        // provider://127.0.0.1:20880/org.apache.dubbo.demo.DemoService?
+        // provider://192.168.1.100:20880/org.apache.dubbo.demo.DemoService?
         // &check=false
         // &anyhost=true
         // &application=dubbo-demo-api-provider
@@ -173,20 +177,21 @@ public class RegistryProtocol implements Protocol {
         final OverrideListener overrideSubscribeListener = new OverrideListener(overrideSubscribeUrl, originInvoker);
         overrideListeners.put(overrideSubscribeUrl, overrideSubscribeListener);
         providerUrl = overrideUrlWithConfig(providerUrl, overrideSubscribeListener);
+        // providerUrl: dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
         logger.debug("providerUrl: " + providerUrl);
         // 导出服务
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
         // 根据URL加载Registry实现类，如ZookeeperRegistry
         final Registry registry = getRegistry(originInvoker);
         // 获取已注册的服务提供者URL，如：
-        // dubbo://127.0.0.1:20880/org.apache.dubbo.demo.DemoService?anyhost=true
+        // dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService?anyhost=true
         // &application=dubbo-demo-api-provider
         // &dubbo=2.0.2
         // &generic=false
         // &interface=org.apache.dubbo.demo.DemoService
         // &methods=sayHello
         final URL registeredProviderUrl = getRegisteredProviderUrl(providerUrl, registryUrl);
-
+        // dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
         logger.debug("registeredProviderUrl: " + registeredProviderUrl);
         // 向服务提供者与消费者注册表中注册服务提供者
         ProviderInvokerWrapper<T> providerInvokerWrapper = ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registeredProviderUrl);
@@ -449,8 +454,12 @@ public class RegistryProtocol implements Protocol {
 
         @Override
         public synchronized void notify(List<URL> urls) {
+            // urls: [empty://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&category=configurators&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0]
             logger.debug("original override urls: " + urls);
             List<URL> matchedUrls = getMatchedUrls(urls, subscribeUrl.addParameter(CATEGORY_KEY, CONFIGURATORS_CATEGORY));
+
+            // subscribe url: provider://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&category=configurators&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
+            // override urls: [empty://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&category=configurators&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0]
             logger.debug("subscribe url: " + subscribeUrl + ", override urls: " + matchedUrls);
             if (matchedUrls.isEmpty()) {
                 return;

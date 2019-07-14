@@ -5,6 +5,7 @@
 //
 package org.apache.dubbo.common.bytecode;
 //
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 

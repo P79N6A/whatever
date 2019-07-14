@@ -146,6 +146,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     @Override
     public synchronized void notify(List<URL> urls) {
 
+        // urls: [empty://192.168.1.100/org.apache.dubbo.demo.DemoService:1.0.0?application=dubbo-demo-api-consumer&category=configurators&dubbo=2.0.2&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=1004&revision=1.0.0&side=consumer&sticky=false&timestamp=1563110848583&version=1.0.0]
+        //  urls: [dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0]
         logger.debug("urls: " + urls);
 
         // 三个集合，分别用于存放服务提供者url，路由url，配置器url

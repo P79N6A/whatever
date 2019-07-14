@@ -85,7 +85,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
     @Override
     public void doRegister(URL url) {
         try {
-// consumer://192.168.1.108/org.apache.dubbo.demo.DemoService:1.0.0?application=dubbo-demo-api-consumer&category=consumers&check=false&dubbo=2.0.2&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=9580&revision=1.0.0&side=consumer&sticky=false&timestamp=1562909622716&version=1.0.0
+            // dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
+            // consumer://192.168.1.108/org.apache.dubbo.demo.DemoService:1.0.0?application=dubbo-demo-api-consumer&category=consumers&check=false&dubbo=2.0.2&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=9580&revision=1.0.0&side=consumer&sticky=false&timestamp=1562909622716&version=1.0.0
             logger.debug(url.toFullString());
             // 通过Zookeeper客户端创建节点，节点路径由toUrlPath方法生成，路径格式如下:
             //   /${group}/${serviceInterface}/providers/${url}

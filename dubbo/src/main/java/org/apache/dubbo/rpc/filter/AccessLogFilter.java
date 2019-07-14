@@ -53,7 +53,6 @@ public class AccessLogFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation inv) throws RpcException {
 
 
-
         try {
             String accessLogKey = invoker.getUrl().getParameter(ACCESS_LOG_KEY);
             if (ConfigUtils.isNotEmpty(accessLogKey)) {

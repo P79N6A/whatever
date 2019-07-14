@@ -602,9 +602,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             // scope != local，导出到远程
             if (!SCOPE_LOCAL.equalsIgnoreCase(scope)) {
                 if (!isOnlyInJvm() && logger.isInfoEnabled()) {
-                    // dubbo://127.0.0.1:20880/org.apache.dubbo.demo.DemoService?anyhost=true
+                    // dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService?anyhost=true
                     // &application=dubbo-demo-api-provider
-                    // &bind.ip=127.0.0.1
+                    // &bind.ip=192.168.1.100
                     // &bind.port=20880
                     // &deprecated=false
                     // &dubbo=2.0.2
@@ -636,9 +636,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         // }
                         if (logger.isInfoEnabled()) {
 
-                            // dubbo://127.0.0.1:20880/org.apache.dubbo.demo.DemoService?anyhost=true
+                            // dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService?anyhost=true
                             // &application=dubbo-demo-api-provider
-                            // &bind.ip=127.0.0.1
+                            // &bind.ip=192.168.1.100
                             // &bind.port=20880
                             // &deprecated=false
                             // &dubbo=2.0.2
@@ -714,7 +714,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
         // injvm://127.0.0.1/org.apache.dubbo.demo.DemoService?anyhost=true
         // &application=dubbo-demo-api-provider
-        // &bind.ip=127.0.0.1
+        // &bind.ip=192.168.1.100
         // &bind.port=20880
         // &deprecated=false
         // &dubbo=2.0.2

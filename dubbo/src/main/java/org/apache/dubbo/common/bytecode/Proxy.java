@@ -12,33 +12,34 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.apache.dubbo.common.constants.CommonConstants.MAX_PROXY_COUNT;
+
 /**
  * public class proxy0 implements ClassGenerator.DC, EchoService, DemoService {
- *     // 方法数组
- *     public static Method[] methods;
- *     private InvocationHandler handler;
- *
- *     public proxy0(InvocationHandler invocationHandler) {
- *         this.handler = invocationHandler;
- *     }
- *
- *     public proxy0() {
- *     }
- *
- *     public String sayHello(String string) {
- *         // 将参数存储到Object数组中
- *         Object[] arrobject = new Object[]{string};
- *         // 调用InvocationHandler实现类的invoke方法得到调用结果
- *         Object object = this.handler.invoke(this, methods[0], arrobject);
- *         // 返回调用结果
- *         return (String)object;
- *     }
- *
- *     public Object $echo(Object object) {
- *         Object[] arrobject = new Object[]{object};
- *         Object object2 = this.handler.invoke(this, methods[1], arrobject);
- *         return object2;
- *     }
+ * // 方法数组
+ * public static Method[] methods;
+ * private InvocationHandler handler;
+ * <p>
+ * public proxy0(InvocationHandler invocationHandler) {
+ * this.handler = invocationHandler;
+ * }
+ * <p>
+ * public proxy0() {
+ * }
+ * <p>
+ * public String sayHello(String string) {
+ * // 将参数存储到Object数组中
+ * Object[] arrobject = new Object[]{string};
+ * // 调用InvocationHandler实现类的invoke方法得到调用结果
+ * Object object = this.handler.invoke(this, methods[0], arrobject);
+ * // 返回调用结果
+ * return (String)object;
+ * }
+ * <p>
+ * public Object $echo(Object object) {
+ * Object[] arrobject = new Object[]{object};
+ * Object object2 = this.handler.invoke(this, methods[1], arrobject);
+ * return object2;
+ * }
  * }
  */
 public abstract class Proxy {

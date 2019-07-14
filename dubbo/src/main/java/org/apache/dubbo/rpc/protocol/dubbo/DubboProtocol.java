@@ -235,10 +235,11 @@ public class DubboProtocol extends AbstractProtocol {
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
 
         URL url = invoker.getUrl();
+        //  dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
         logger.debug("url: " + url);
         // 获取服务标识，理解成服务坐标也行
         // 由服务组名，服务名，服务版本号以及端口组成
-        // 比如：demoGroup/com.alibaba.dubbo.demo.DemoService:1.0.1:20880
+        // 比如：org.apache.dubbo.demo.DemoService:1.0.0:1.0.0:20880
         String key = serviceKey(url);
         logger.debug("key: " + key);
         // 创建DubboExporter
@@ -305,7 +306,7 @@ public class DubboProtocol extends AbstractProtocol {
         if (str != null && str.length() > 0 && !ExtensionLoader.getExtensionLoader(Transporter.class).hasExtension(str)) {
             throw new RpcException("Unsupported server type: " + str + ", url: " + url);
         }
-
+        // dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-provider&bind.ip=192.168.1.100&bind.port=20880&channel.readonly.sent=true&codec=dubbo&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&heartbeat=60000&interface=org.apache.dubbo.demo.DemoService&methods=sayHello&pid=3580&register=true&release=&revision=1.0.0&sayHello.timeout=1000&side=provider&timestamp=1563110838271&version=1.0.0
         logger.debug("url: " + url);
         ExchangeServer server;
         try {
@@ -360,6 +361,7 @@ public class DubboProtocol extends AbstractProtocol {
 
     @Override
     public <T> Invoker<T> refer(Class<T> serviceType, URL url) throws RpcException {
+        // url: dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-consumer&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=1004&register=true&register.ip=192.168.1.100&remote.application=dubbo-demo-api-provider&revision=1.0.0&sayHello.timeout=1000&side=consumer&sticky=false&timestamp=1563110838271&version=1.0.0
         logger.debug("url: " + url);
         optimizeSerialization(url);
         // 创建DubboInvoker
@@ -376,6 +378,7 @@ public class DubboProtocol extends AbstractProtocol {
      * 默认只有一个客户端，称为共享连接，也可以使用多个连接，在 <dubbo:reference connections="3" /> 配置
      */
     private ExchangeClient[] getClients(URL url) {
+        // url: dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-consumer&check=false&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=1004&register=true&register.ip=192.168.1.100&remote.application=dubbo-demo-api-provider&revision=1.0.0&sayHello.timeout=1000&side=consumer&sticky=false&timestamp=1563110838271&version=1.0.0
         logger.debug("url: " + url);
         // 是否共享连接
         boolean useShareConnect = false;
@@ -487,6 +490,7 @@ public class DubboProtocol extends AbstractProtocol {
         if (str != null && str.length() > 0 && !ExtensionLoader.getExtensionLoader(Transporter.class).hasExtension(str)) {
             throw new RpcException("Unsupported client type: " + str + "," + " supported client type is " + StringUtils.join(ExtensionLoader.getExtensionLoader(Transporter.class).getSupportedExtensions(), " "));
         }
+        // url: dubbo://192.168.1.100:20880/org.apache.dubbo.demo.DemoService:1.0.0?anyhost=true&application=dubbo-demo-api-consumer&check=false&codec=dubbo&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&heartbeat=60000&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=1004&register=true&register.ip=192.168.1.100&remote.application=dubbo-demo-api-provider&revision=1.0.0&sayHello.timeout=1000&side=consumer&sticky=false&timestamp=1563110838271&version=1.0.0
         logger.debug("url: " + url);
         ExchangeClient client;
         try {

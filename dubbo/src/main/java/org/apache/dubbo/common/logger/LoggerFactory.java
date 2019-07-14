@@ -41,7 +41,7 @@ public class LoggerFactory {
                 break;
             default:
                 // Log4jLoggerAdapter
-                List<Class<? extends LoggerAdapter>> candidates = Arrays.asList( Log4jLoggerAdapter.class, Slf4jLoggerAdapter.class, Log4j2LoggerAdapter.class,JclLoggerAdapter.class, JdkLoggerAdapter.class);
+                List<Class<? extends LoggerAdapter>> candidates = Arrays.asList(Log4jLoggerAdapter.class, Slf4jLoggerAdapter.class, Log4j2LoggerAdapter.class, JclLoggerAdapter.class, JdkLoggerAdapter.class);
                 for (Class<? extends LoggerAdapter> clazz : candidates) {
                     try {
                         setLoggerAdapter(clazz.newInstance());
