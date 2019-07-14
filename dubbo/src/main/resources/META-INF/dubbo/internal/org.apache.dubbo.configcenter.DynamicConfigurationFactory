@@ -1,0 +1,8 @@
+nop=org.apache.dubbo.configcenter.support.nop.NopDynamicConfigurationFactory
+consul=org.apache.dubbo.configcenter.consul.ConsulDynamicConfigurationFactory
+etcd=org.apache.dubbo.configcenter.support.etcd.EtcdDynamicConfigurationFactory
+nacos=org.apache.dubbo.configcenter.support.nacos.NacosDynamicConfigurationFactory
+mock=org.apache.dubbo.configcenter.mock.MockDynamicConfigurationFactory
+zookeeper=org.apache.dubbo.configcenter.support.zookeeper.ZookeeperDynamicConfigurationFactory
+apollo=org.apache.dubbo.configcenter.support.apollo.ApolloDynamicConfigurationFactory
+

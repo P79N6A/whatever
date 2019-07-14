@@ -1,0 +1,12 @@
+dubbo=org.apache.dubbo.registry.dubbo.DubboRegistryFactory
+multiple=org.apache.dubbo.registry.multiple.MultipleRegistryFactory
+nacos=org.apache.dubbo.registry.nacos.NacosRegistryFactory
+multicast=org.apache.dubbo.registry.multicast.MulticastRegistryFactory
+etcd3=org.apache.dubbo.registry.etcd.EtcdRegistryFactory
+sofa=org.apache.dubbo.registry.sofa.SofaRegistryFactory
+redis=org.apache.dubbo.registry.redis.RedisRegistryFactory
+mock=org.apache.dubbo.config.spring.registry.MockRegistryFactory
+zookeeper=org.apache.dubbo.registry.zookeeper.ZookeeperRegistryFactory
+
+consul=org.apache.dubbo.registry.consul.ConsulRegistryFactory
+

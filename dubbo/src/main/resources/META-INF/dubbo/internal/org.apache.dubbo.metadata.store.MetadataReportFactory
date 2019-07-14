@@ -1,0 +1,9 @@
+nacos=org.apache.dubbo.metadata.store.nacos.NacosMetadataReportFactory
+zookeeper=org.apache.dubbo.metadata.store.zookeeper.ZookeeperMetadataReportFactory
+etcd=org.apache.dubbo.metadata.store.etcd.EtcdMetadataReportFactory
+
+JTest=org.apache.dubbo.metadata.store.test.JTestMetadataReportFactory4Test
+consul=org.apache.dubbo.metadata.store.consul.ConsulMetadataReportFactory
+
+
+
