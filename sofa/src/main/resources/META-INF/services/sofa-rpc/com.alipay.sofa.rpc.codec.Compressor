@@ -1,0 +1,1 @@
+snappy=com.alipay.sofa.rpc.codec.snappy.SnappyRpcCompressor

@@ -1,0 +1,2 @@
+consul=com.alipay.sofa.rpc.registry.consul.ConsulRegistry
+zookeeper=com.alipay.sofa.rpc.registry.zk.ZookeeperRegistry

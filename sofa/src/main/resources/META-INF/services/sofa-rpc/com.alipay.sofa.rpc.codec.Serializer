@@ -1,0 +1,2 @@
+protobuf=com.alipay.sofa.rpc.codec.protobuf.ProtobufSerializer
+hessian2=com.alipay.sofa.rpc.codec.sofahessian.SofaHessianSerializer

@@ -1,0 +1,93 @@
+package com.alipay.remoting.rpc.client;
+
+import com.alipay.remoting.Connection;
+import com.alipay.remoting.ConnectionEventType;
+import com.alipay.remoting.exception.RemotingException;
+import com.alipay.remoting.rpc.BasicUsageTest;
+import com.alipay.remoting.rpc.RpcClient;
+import com.alipay.remoting.rpc.common.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ClientConnectionTest {
+    static Logger logger = LoggerFactory.getLogger(BasicUsageTest.class);
+
+    BoltServer server;
+
+    RpcClient client;
+
+    int port = PortScan.select();
+
+    String ip = "127.0.0.1";
+
+    String addr = "127.0.0.1:" + port;
+
+    int invokeTimes = 5;
+
+    SimpleServerUserProcessor serverUserProcessor = new SimpleServerUserProcessor();
+
+    SimpleClientUserProcessor clientUserProcessor = new SimpleClientUserProcessor();
+
+    CONNECTEventProcessor clientConnectProcessor = new CONNECTEventProcessor();
+
+    CONNECTEventProcessor serverConnectProcessor = new CONNECTEventProcessor();
+
+    DISCONNECTEventProcessor clientDisConnectProcessor = new DISCONNECTEventProcessor();
+
+    DISCONNECTEventProcessor serverDisConnectProcessor = new DISCONNECTEventProcessor();
+
+    @Before
+    public void init() {
+        server = new BoltServer(port, true);
+        server.start();
+        server.addConnectionEventProcessor(ConnectionEventType.CONNECT, serverConnectProcessor);
+        server.addConnectionEventProcessor(ConnectionEventType.CLOSE, serverDisConnectProcessor);
+        server.registerUserProcessor(serverUserProcessor);
+        client = new RpcClient();
+        client.addConnectionEventProcessor(ConnectionEventType.CONNECT, clientConnectProcessor);
+        client.addConnectionEventProcessor(ConnectionEventType.CLOSE, clientDisConnectProcessor);
+        client.registerUserProcessor(clientUserProcessor);
+        client.init();
+    }
+
+    @After
+    public void stop() {
+        try {
+            server.stop();
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            logger.error("Stop server failed!", e);
+        }
+    }
+
+    @Test
+    public void testCheckConnection() throws InterruptedException {
+        Connection conn = null;
+        try {
+            conn = client.getConnection(addr, 3000);
+        } catch (RemotingException e) {
+            Assert.fail("should not reach here");
+        }
+        Assert.assertTrue(client.checkConnection(addr));
+        conn.close();
+        Thread.sleep(100);
+        Assert.assertFalse(client.checkConnection(addr));
+    }
+
+    @Test
+    public void testGetAll() throws InterruptedException {
+        Connection conn = null;
+        try {
+            conn = client.getConnection(addr, 3000);
+        } catch (RemotingException e) {
+            Assert.fail("should not reach here");
+        }
+        Assert.assertEquals(1, client.getAllManagedConnections().size());
+        Assert.assertEquals(1, client.getAllManagedConnections().get(addr).size());
+    }
+
+}

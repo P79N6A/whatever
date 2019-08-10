@@ -1,0 +1,3 @@
+dubbo=com.alipay.sofa.rpc.bootstrap.dubbo.DubboConsumerBootstrap
+
+sofa=com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap

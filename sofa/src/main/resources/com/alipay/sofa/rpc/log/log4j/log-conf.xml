@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="ERROR-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/common-error.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="error"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="ROOT-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/common-default.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="RPC-CODEC-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/rpc-codec.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="RPC-REGISTRY-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/rpc-registry.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="RPC-CLIENT-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/rpc-client.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="RPC-SERVER-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/rpc-server.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="RPC-TRANSPORT-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/rpc-transport.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <logger name="com.alipay.sofa.rpc.registry" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="RPC-REGISTRY-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa.rpc.client" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="RPC-CLIENT-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa.rpc.codec" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="RPC-CODEC-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa.rpc.server" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="RPC-SERVER-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa.rpc.transport" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="RPC-TRANSPORT-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <root>
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="ROOT-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </root>
+
+</log4j:configuration>
